@@ -1,0 +1,60 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+input {
+  margin-bottom: 10px;
+  padding: 6px;
+  width: 300px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid #000;
+  padding: 6px;
+  font-size: 14px;
+}
+
+th {
+  background: #ffe600;
+}
+
+.category {
+  background: #ffe600;
+  font-weight: bold;
+}
+
+.action-btn {
+  display: none;
+}
+
+tr:hover .action-btn {
+  display: inline-block;
+}
+
+.edit-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.edit-icon {
+  display: none;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 6px;
+  color: #555;
+}
+
+tr:hover .edit-icon {
+  display: inline;
+}
+
+.edit-input {
+  width: 100%;
+  box-sizing: border-box;
+}
