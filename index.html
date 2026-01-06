@@ -2,35 +2,110 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Materialübersicht</title>
- <link rel="stylesheet" href="css/style.css">
-
-
+<title>Materialliste</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<h2>Materialliste</h2>
+<!-- =========================
+     LOGIN-BEREICH
+========================= -->
+<div id="loginBox">
+  <h3>Anmeldung erforderlich</h3>
+  <input id="userInput" placeholder="Benutzer">
+  <input id="passInput" type="password" placeholder="Passwort">
+  <button onclick="login()">Anmelden</button>
+</div>
 
-<input type="text" id="search" placeholder="Material suchen…">
+<!-- =========================
+     GESCHÜTZTE APP
+========================= -->
+<div id="app" style="display:none">
 
-<table>
-<thead>
-<tr>
-  <th>Material</th>
-  <th>E-Nummer</th>
-  <th>Regal</th>
-  <th>Bestandliste</th>
-  <th>Aktion</th>
-</tr>
-</thead>
-<tbody id="tableBody"></tbody>
-</table>
-    <footer>
-        <div id="kimlik" data-i18n="footer_author">© Dilaver Bölükbaşı</div>
-        <div id="lastUpdate" data-i18n="footer_lastupdate"></div>
-        <div id="updateStatus" class="update-status"></div>
-    </footer>
-                <!-- Mein Script.js -->
-        <script src="js/daten.js"></script>
+  <!-- Logout sperrt die komplette Liste wieder -->
+  <button onclick="logout()">Logout</button>
+
+  <!-- Button: komplette Liste anzeigen / ausblenden -->
+  <button id="toggleListBtn" onclick="toggleList()">📋 Liste anzeigen</button>
+  <button id="fsToggleBtn"  onclick="toggleFS()"  style="display:none">FS-Liste anzeigen</button>
+  <h2>Materialliste</h2>
+
+  <!-- Key-Freischaltung -->
+  <input id="keyInput" type="password" placeholder="Key eingeben">
+  <button id="unlockBtn" onclick="unlockEditing()">Freischalten</button>
+  <button onclick="lockEditing()">Sperren</button>
+  <span id="status"></span>
+
+  <br><br>
+
+  <!-- Suche & Filter -->
+  <input id="search" placeholder="Suche (Material, E-Nummer, Regal)">
+  <select id="categoryFilter">
+    <option value="">Alle Kategorien</option>
+  </select>
+
+  <!-- Material Tabelle -->
+  <table>
+    <thead>
+      <tr>
+        <th>Material</th>
+        <th>E-Nummer</th>
+        <th>Regal</th>
+        <th>Bestandliste</th>
+        <th>Aktion</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <!-- Änderungshistorie -->
+  <h3>Änderungshistorie</h3>
+  <button onclick="toggleHistory()">Historie anzeigen / ausblenden</button>
+  <button onclick="clearHistory()">Historie löschen</button>
+
+  <table id="historyTable" style="display:none; margin-top:10px;">
+    <thead>
+      <tr>
+        <th>Zeit</th>
+        <th>Feld</th>
+        <th>Alt</th>
+        <th>Neu</th>
+      </tr>
+    </thead>
+    <tbody id="historyBody"></tbody>
+  </table>
+</div>
+
+
+<!-- =========================
+     FS – FIRELINER 
+========================= -->
+<div id="fsSection" id="fsSection" style="display:none">
+  <h3 class="fs-title">Feingussschmelze FS</h3>
+
+  <table class="lager-table fs-table">
+    <thead>
+      <tr>
+        <!-- Erste Spalte aus dem Foto -->
+        <th>Kurz Bezeichnung</th>
+
+        <th>Bezeichnung</th>
+        <th>Material</th>
+        <th>Stückzahl</th>
+        <th>E-Nummer</th>
+        <th>Kürzel</th>
+        <th>Bestand Konsilager</th>
+        <th>DPC</th>
+      </tr>
+    </thead>
+
+    <tbody id="fsTableBody"></tbody>
+  </table>
+</div>
+
+
+<script src="js/data_store.js"></script>
+<script src="js/daten.js"></script>
+<script src="js/daten_fs.js"></script>
 </body>
 </html>

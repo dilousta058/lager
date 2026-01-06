@@ -1,60 +1,80 @@
-body {
-  font-family: Arial, sans-serif;
+body { font-family: Arial, sans-serif; }
+
+#loginBox {
+  max-width: 300px;
+  margin: 100px auto;
+  border: 1px solid #000;
+  padding: 20px;
 }
 
-input {
-  margin-bottom: 10px;
+input, select {
+  margin: 5px 0;
   padding: 6px;
-  width: 300px;
+  width: 100%;
 }
 
 table {
-  border-collapse: collapse;
   width: 100%;
+  border-collapse: collapse;
 }
 
 th, td {
   border: 1px solid #000;
   padding: 6px;
-  font-size: 14px;
 }
 
-th {
-  background: #ffe600;
-}
-
-.category {
+th, .category {
   background: #ffe600;
   font-weight: bold;
-}
-
-.action-btn {
-  display: none;
-}
-
-tr:hover .action-btn {
-  display: inline-block;
 }
 
 .edit-wrapper {
   display: flex;
   justify-content: space-between;
-  align-items: center;
 }
 
 .edit-icon {
   display: none;
   cursor: pointer;
-  font-size: 14px;
-  margin-left: 6px;
-  color: #555;
 }
 
 tr:hover .edit-icon {
   display: inline;
 }
 
+/* Geschützte Felder */
+.protected {
+  background: #f0f0f0;
+}
+
+/* Suchtreffer */
+.highlight {
+  background: yellow;
+}
+
 .edit-input {
   width: 100%;
-  box-sizing: border-box;
+}
+
+.lager-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lager-table th,
+.lager-table td {
+  border: 1px solid #000;
+  padding: 4px 6px;
+}
+
+.category-row td {
+  background: #ffeb3b;
+  font-weight: bold;
+  text-align: center;
+}
+
+.edit-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

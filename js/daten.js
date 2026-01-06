@@ -1,151 +1,301 @@
 
-/* =======================
+/* =====================================================
    KONFIGURATION
-======================= */
+===================================================== */
 const STORAGE_KEY = "materialData";
+const HISTORY_KEY = "materialHistory";
+const LOGIN_USER = "DiloUsta58";
+const LOGIN_PASS = "64579";
+const EDIT_KEY = "64579";
+const AUTO_LOCK_MINUTES = 10;
 const PROTECTED_FIELDS = ["material", "e"];
+
+/* =====================================================
+   STATUS
+===================================================== */
+let loggedIn = false;
+let listVisible = false;
 let editEnabled = localStorage.getItem("editEnabled") === "true";
-const defaultData = [
+let lockTimer = null;
+let fsVisible = false;
 
-/* =======================
-   MATERIAL KERAMIK
-======================= */
-{ cat: "Material Keramik", material: "Alodur 0,1 - 0,15", e: "E32873900", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "Alodur 0,25 - 0,5", e: "E32874100", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "Alodur 0,5 - 1", e: "E32874200", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "Tabular 14/28", e: "E32873100", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "DPC 200 mesh", e: "E32809100", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "DPC 300 mesh", e: "E32809200", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "DPC 300FG", e: "E32809301", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "ZFG", e: "E32809300", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "Nabalox", e: "E32870500", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "F-240", e: "E32870800", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "F-280", e: "E32874280", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "ZrO2 (ehemals Q1)", e: "E32871400", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "Cobalt Aluminat", e: "E32808800", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "Rhoseal", e: "E32873000", shelf: "", bestand: "" },
-{ cat: "Material Keramik", material: "Rhoseal HT", e: "E32873200", shelf: "", bestand: "" },
-
-/* =======================
-   MATERIAL KERNFERTIGUNG
-======================= */
-{ cat: "Material Kernfertigung", material: "Remet FS 120 Mesh LHT", e: "E00010380", shelf: "", bestand: "" },
-{ cat: "Material Kernfertigung", material: "Amosil FW4", e: "E00010376", shelf: "", bestand: "" },
-{ cat: "Material Kernfertigung", material: "Amosil 550", e: "E00010377", shelf: "", bestand: "" },
-{ cat: "Material Kernfertigung", material: "Sikron SF6000", e: "E00001155", shelf: "", bestand: "" },
-{ cat: "Material Kernfertigung", material: "Zirkon", e: "E00004495", shelf: "", bestand: "" },
-{ cat: "Material Kernfertigung", material: "A800", e: "E00000452", shelf: "", bestand: "" },
-{ cat: "Material Kernfertigung", material: "Al-Stearat", e: "E00001142", shelf: "", bestand: "" },
-{ cat: "Material Kernfertigung", material: "Ca-Stearat", e: "E00000451", shelf: "", bestand: "" },
-{ cat: "Material Kernfertigung", material: "Nabalox No202 II", e: "", shelf: "", bestand: "" },
-
-/* =======================
-   MATERIAL WACHS
-======================= */
-{ cat: "Material Wachs", material: "Modellwachs A7 FR 60", e: "E32880700", shelf: "", bestand: "" },
-{ cat: "Material Wachs", material: "Paracast FW 14896", e: "E32882600", shelf: "", bestand: "" },
-{ cat: "Material Wachs", material: "B559", e: "E32882300", shelf: "", bestand: "" },
-
-/* =======================
-   MATERIAL FLÜSSIGKEITEN
-======================= */
-{ cat: "Material Flüssigkeiten Keramik", material: "W640", e: "E32874640", shelf: "", bestand: "" },
-{ cat: "Material Flüssigkeiten Keramik", material: "Latex", e: "E32874500", shelf: "", bestand: "" },
-{ cat: "Material Flüssigkeiten Keramik", material: "Ludox", e: "E32874300", shelf: "", bestand: "" },
-{ cat: "Material Flüssigkeiten Keramik", material: "Isopropanol", e: "E00006517", shelf: "", bestand: "" },
-{ cat: "Material Flüssigkeiten Keramik", material: "Symperonic", e: "E32871300", shelf: "", bestand: "" }
-
-];
-
+/* =====================================================
+   DATEN
+===================================================== */
 let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
 
-/* =======================
+/* =====================================================
+   LOGIN / LOGOUT
+===================================================== */
+function login() {
+  const user = userInput.value;
+  const pass = passInput.value;
+
+  if (user === LOGIN_USER && pass === LOGIN_PASS) {
+    loggedIn = true;
+    listVisible = false;
+    loginBox.style.display = "none";
+    app.style.display = "block";
+    tableBody.innerHTML = "";
+    // FS-Bereich freigeben
+    document.getElementById("fsToggleBtn").style.display = "inline-block";
+    fsVisible = false;
+    document.getElementById("fsSection").style.display = "none";
+
+    initCategories();
+    syncUI();
+    updateToggleButton();
+  } else {
+    alert("Login fehlgeschlagen");
+  }
+}
+
+function logout() {
+  loggedIn = false;
+  listVisible = false;
+  editEnabled = false;
+    // FS sperren
+    fsVisible = false;
+    document.getElementById("fsSection").style.display = "none";
+    document.getElementById("fsToggleBtn").style.display = "none";
+
+  localStorage.removeItem("editEnabled");
+  app.style.display = "none";
+  loginBox.style.display = "block";
+  tableBody.innerHTML = "";
+}
+
+/* =====================================================
+   LISTE EIN / AUS
+===================================================== */
+function toggleList() {
+  if (!loggedIn) return;
+
+  listVisible = !listVisible;
+  updateToggleButton();
+
+  if (listVisible) {
+    render();
+  } else {
+    tableBody.innerHTML = "";
+  }
+}
+
+function updateToggleButton() {
+  toggleListBtn.textContent = listVisible
+    ? "📋 Liste ausblenden"
+    : "📋 Liste anzeigen";
+}
+
+function toggleFS() {
+  if (!loggedIn) return;
+
+  fsVisible = !fsVisible;
+
+  const fsSection = document.getElementById("fsSection");
+  const btn = document.getElementById("fsToggleBtn");
+
+  fsSection.style.display = fsVisible ? "block" : "none";
+  btn.textContent = fsVisible
+    ? "FS-Liste ausblenden"
+    : "FS-Liste anzeigen";
+}
+
+/* =====================================================
    STORAGE
-======================= */
+===================================================== */
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-/* =======================
-   RENDERING
-======================= */
-function render(filter = "") {
-  const body = document.getElementById("tableBody");
-  body.innerHTML = "";
-  let lastCat = "";
+function saveHistory(entry) {
+  const h = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+  h.push(entry);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+}
+
+/* =====================================================
+   KEY-STEUERUNG
+===================================================== */
+function unlockEditing() {
+  if (keyInput.value !== EDIT_KEY) {
+    alert("Falscher Key");
+    return;
+  }
+  editEnabled = true;
+  localStorage.setItem("editEnabled", "true");
+  startAutoLock();
+  syncUI();
+  render();
+}
+
+function lockEditing() {
+  editEnabled = false;
+  localStorage.removeItem("editEnabled");
+  clearTimeout(lockTimer);
+  syncUI();
+  render();
+}
+
+function startAutoLock() {
+  clearTimeout(lockTimer);
+  lockTimer = setTimeout(lockEditing, AUTO_LOCK_MINUTES * 60000);
+}
+
+function syncUI() {
+  unlockBtn.disabled = editEnabled;
+  status.textContent = editEnabled
+    ? "🔓 Bearbeitung aktiv"
+    : "🔒 Geschützt";
+}
+
+/* =====================================================
+   KATEGORIEN INITIALISIEREN
+===================================================== */
+function initCategories() {
+  categoryFilter.innerHTML = '<option value="">Alle Kategorien</option>';
+  [...new Set(data.map(d => d.cat))].forEach(cat => {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    categoryFilter.appendChild(opt);
+  });
+}
+
+/* =====================================================
+   SUCHE
+===================================================== */
+function parseQuery(q) {
+  const obj = {};
+  if (!q || !q.trim()) return obj;
+
+  q.trim().split(/\s+/).forEach(p => {
+    const [k, v] = p.includes(":") ? p.split(":") : ["all", p];
+    if (v) obj[k] = v.toLowerCase();
+  });
+
+  return obj;
+}
+
+function highlight(text, q) {
+  if (!q) return text;
+  return text.replace(
+    new RegExp(`(${q})`, "gi"),
+    '<span class="highlight">$1</span>'
+  );
+}
+
+/* =====================================================
+   RENDERING MIT KATEGORIEN (1:1 LOGIK WIE FRÜHER)
+===================================================== */
+function render() {
+  if (!loggedIn || !listVisible) return;
+
+  tableBody.innerHTML = "";
+
+  const query = parseQuery(search.value);
+  const catFilter = categoryFilter.value;
+  const noSearch = Object.keys(query).length === 0;
+
+  let lastCat = null;
 
   data.forEach((m, i) => {
-    if (!m.material || !m.material.toLowerCase().includes(filter.toLowerCase())) return;
+    if (catFilter && m.cat !== catFilter) return;
+
+    const hay = (m.material + m.e + m.shelf).toLowerCase();
+
+    const hit =
+      noSearch ||
+      (query.material && m.material.toLowerCase().includes(query.material)) ||
+      (query.e && m.e.toLowerCase().includes(query.e)) ||
+      (query.regal && m.shelf.toLowerCase().includes(query.regal)) ||
+      (query.all && hay.includes(query.all));
+
+    if (!hit) return;
 
     if (m.cat !== lastCat) {
-      body.innerHTML += `<tr class="category"><td colspan="5">${m.cat}</td></tr>`;
+      tableBody.innerHTML +=
+        `<tr class="category"><td colspan="5">${m.cat}</td></tr>`;
       lastCat = m.cat;
     }
 
-    body.innerHTML += `
+    tableBody.innerHTML += `
       <tr>
-        ${editableCell(m.material, i, "material")}
-        ${editableCell(m.e, i, "e")}
-        ${editableCell(m.shelf, i, "shelf")}
-        ${editableCell(m.bestand, i, "bestand")}
-        <td>—</td>
+        ${cell(highlight(m.material, query.material || query.all), i, "material")}
+        ${cell(highlight(m.e, query.e || query.all), i, "e")}
+        ${cell(highlight(m.shelf, query.regal || query.all), i, "shelf")}
+        ${cell(m.bestand, i, "bestand")}
+        <td></td>
       </tr>
     `;
   });
 }
 
-/* =======================
-   EDITING
-======================= */
-function editableCell(value, index, field) {
-  const needsKey = PROTECTED_FIELDS.includes(field);
-  const canEdit = !needsKey || editEnabled;
+/* =====================================================
+   INLINE EDIT
+===================================================== */
+function cell(value, index, field) {
+  const protectedField = PROTECTED_FIELDS.includes(field);
+  const canEdit = !protectedField || editEnabled;
 
   return `
-    <td>
+    <td class="${protectedField ? "protected" : ""}">
       <div class="edit-wrapper">
-        <span>${value || ""}</span>
-        ${canEdit ? `<span class="edit-icon" onclick="startEdit(this, ${index}, '${field}')">✏️</span>` : ""}
+        <span>${value}</span>
+        ${
+          canEdit
+            ? `<span class="edit-icon" onclick="editCell(this, ${index}, '${field}')">✏️</span>`
+            : ""
+        }
       </div>
     </td>
   `;
 }
 
-function startEdit(icon, index, field) {
-  const needsKey = PROTECTED_FIELDS.includes(field);
-  if (needsKey && !editEnabled) {
-    alert("Dieser Bereich ist geschützt.");
-    return;
-  }
+function editCell(icon, index, field) {
+  if (PROTECTED_FIELDS.includes(field) && !editEnabled) return;
 
   const td = icon.closest("td");
-  const currentValue = data[index][field];
+  const oldValue = data[index][field];
 
-  td.innerHTML = `<input class="edit-input" value="${currentValue || ""}">`;
+  td.innerHTML = `<input class="edit-input" value="${oldValue}">`;
   const input = td.querySelector("input");
   input.focus();
 
-  input.addEventListener("blur", () => finishEdit(input, index, field));
-  input.addEventListener("keydown", e => {
-    if (e.key === "Enter") input.blur();
+  input.addEventListener("blur", () => {
+    data[index][field] = input.value;
+    save();
+    saveHistory({
+      time: new Date().toISOString(),
+      field,
+      oldValue,
+      newValue: input.value
+    });
+    render();
   });
 }
 
-function finishEdit(input, index, field) {
-  data[index][field] = input.value;
-  save();
-  render(document.getElementById("search").value);
+/* =====================================================
+   EVENTS & START
+===================================================== */
+function debounce(fn, delay = 300) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(null, args), delay);
+  };
 }
 
-/* =======================
-   EVENTS
-======================= */
-document.getElementById("search").addEventListener("input", e => {
-  render(e.target.value);
-});
+const debouncedRender = debounce(render, 300);
 
-/* =======================
-   START
-======================= */
-render();
+search.addEventListener("input", debouncedRender);
+categoryFilter.addEventListener("change", render);
 
+["click", "keydown", "mousemove"].forEach(evt =>
+  document.addEventListener(evt, () => {
+    if (editEnabled) startAutoLock();
+  })
+);
+
+syncUI();
+updateToggleButton();
