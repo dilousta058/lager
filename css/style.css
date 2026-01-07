@@ -143,3 +143,51 @@ button {
     justify-content: space-between;
   }
 }
+
+/* =========================
+   MOBILE KOMPAKTANSICHT
+========================= */
+@media (max-width: 768px) {
+
+  .lager-table thead {
+    display: none;
+  }
+
+  .lager-table,
+  .lager-table tbody,
+  .lager-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .lager-table tr {
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 8px;
+    background: #fff;
+  }
+
+  .lager-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 4px;
+    border: none;
+    font-size: 14px;
+  }
+
+  .lager-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #444;
+    margin-right: 10px;
+  }
+
+  .category-row td {
+    display: block;
+    text-align: center;
+    font-weight: bold;
+    background: #ffeb3b;
+    border-radius: 6px;
+  }
+}
