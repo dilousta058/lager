@@ -1,257 +1,269 @@
-body { font-family: Arial, sans-serif; }
 
+/* =====================================================
+   DESIGN SYSTEM – LIGHT / DARK MODE
+===================================================== */
+:root {
+  --bg: #f4f6fb;
+  --bg-card: #fde68a;
+  --text: #1f2937;
+  --accent: #2563eb;
+  --accent-soft: #05b93b;
+  --row-even: #03fcb1;
+  --row-odd: #131208;
+  --border: #d0d7e2;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --bg-card: #020617;
+  --text: #e5e7eb;
+  --accent: #60a5fa;
+  --accent-soft: #1e293b;
+  --row-even: #676864;
+  --row-odd: #b17900;
+  --border: #334155;
+}
+
+/* =====================================================
+   GLOBAL
+===================================================== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* =====================================================
+   LOGIN BOX – PROFESSIONAL
+===================================================== */
 #loginBox {
-  max-width: 300px;
-  margin: 100px auto;
-  border: 1px solid #000;
-  padding: 20px;
+  max-width: 360px;
+  margin: 10vh auto;
+  background: var(--bg-card);
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+#loginBox h2 {
+  margin-top: 0;
+  text-align: center;
+  font-weight: 600;
 }
 
 input, select {
-  margin: 5px 0;
-  padding: 6px;
   width: 100%;
+  padding: 10px 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-size: 15px;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+/* Key Input – max 10 Zeichen */
+#keyInput {
+  max-width: 180px;
 }
 
-th, td {
-  border: 1px solid #000;
-  padding: 6px;
-}
-
-th, .category {
-  background: #ffe600;
-  font-weight: bold;
-}
-
-.edit-wrapper {
-  display: flex;
-  justify-content: space-between;
-}
-
-.edit-icon {
-  display: none;
+/* =====================================================
+   BUTTONS – WINDOWS 11 STYLE
+===================================================== */
+button {
+  background: linear-gradient(180deg, #ffffff, #e6e9f2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 15px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-tr:hover .edit-icon {
-  display: inline;
+button:hover {
+  background: linear-gradient(180deg, #ffffff, #dfe4f2);
 }
 
-/* Geschützte Felder */
-.protected {
-  background: #f0f0f0;
+button:active {
+  transform: scale(0.98);
 }
 
-/* Suchtreffer */
-.highlight {
-  background: yellow;
+/* =====================================================
+   HEADINGS
+===================================================== */
+h1, h2, h3 {
+  font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
-.edit-input {
-  width: 100%;
+.fs-title {
+  text-align: center;
+  margin: 20px 0 10px;
 }
+
+/* =====================================================
+   SEARCH & FILTER CONTROLS
+===================================================== */
+#search {
+  width: 80%;
+  margin: 10px auto;
+  display: block;
+}
+
+#categoryFilter {
+  display: block;
+  margin: 10px auto;
+  max-width: 50ch;
+}
+
+
+
+
+
+/* =====================================================
+   TABELLEN – KLARE, RUHIGE DARSTELLUNG
+===================================================== */
 
 .lager-table {
   width: 100%;
   border-collapse: collapse;
+  background: var(--bg-card);
+  font-size: 14px;
 }
 
-.lager-table th,
+/* Kopf */
+.lager-table thead th {
+  background: #e5e7eb;
+  color: #111827;
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--border);
+}
+
+/* Dark Mode Kopf */
+[data-theme="dark"] .lager-table thead th {
+  background: #1e293b;
+  color: #e5e7eb;
+}
+
+/* Zellen */
 .lager-table td {
-  border: 1px solid #000;
-  padding: 4px 6px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
 }
 
-.category-row td {
-  background: #ffeb3b;
-  font-weight: bold;
-  text-align: center;
+/* Ruhiges Zebra – dezent */
+.lager-table tbody tr:nth-child(even) {
+  background: #f8fafc;
 }
 
+.lager-table tbody tr:nth-child(odd) {
+  background: #ffffff;
+}
+
+/* Dark Mode Zebra */
+[data-theme="dark"] .lager-table tbody tr:nth-child(even) {
+  background: #020617;
+}
+
+[data-theme="dark"] .lager-table tbody tr:nth-child(odd) {
+  background: #020617;
+}
+
+/* Hover – KEIN Höhenwechsel */
+.lager-table tbody tr:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* =====================================================
+   KATEGORIE-ZEILEN – GELB (WIE VORLAGE)
+===================================================== */
+
+.category-row td,
+tr.category td {
+  background: #fde68a;          /* Gelb */
+  color: #78350f;
+  font-weight: 700;
+  text-align: left;
+  border-top: 2px solid #f59e0b;
+  border-bottom: 2px solid #f59e0b;
+}
+
+/* Dark Mode Kategorie */
+[data-theme="dark"] .category-row td,
+[data-theme="dark"] tr.category td {
+  background: #92400e;
+  color: #fef3c7;
+  border-color: #fbbf24;
+}
+
+
+/* Suchtreffer */
+.highlight {
+  background: rgb(6, 110, 46);
+}
+
+/* =====================================================
+   EDIT ICONS
+===================================================== */
 .edit-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.column-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 10px 0;
-  font-size: 14px;
-}
-
-/* =========================
-   FS = MATERIAL UX ANGLEICHEN
-========================= */
-
-.fs-table td,
-.fs-table th {
-  padding: 8px;
-  font-size: 14px;
-}
-
-.fs-table .edit-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.fs-table .edit-icon {
-  cursor: pointer;
+.edit-icon {
   opacity: 0;
-  transition: opacity 0.2s;
+  cursor: pointer;
 }
 
-/* Hover Desktop */
-.fs-table td:hover .edit-icon {
+td:hover .edit-icon {
   opacity: 1;
 }
 
-/* =========================
-   SPALTEN-CHECKBOXEN LAYOUT
-========================= */
-
+/* =====================================================
+   COLUMN CONTROLS
+===================================================== */
 .ke-column-controls,
 .fs-column-controls {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 14px;
-  align-items: center;
+  margin: 12px 0;
 }
 
-.ke-column-controls label,
-.fs-column-controls label {
+label {
   display: flex;
   align-items: center;
   gap: 6px;
-  white-space: nowrap;
 }
 
-
-/* Mobile: immer sichtbar */
-@media (max-width: 768px) {
-  .fs-table .edit-icon {
-    opacity: 1;
+/* =====================================================
+   MOBILE / TABLET OPTIMIZATION
+===================================================== */
+@media (max-width: 1024px) {
+  .lager-table {
+    font-size: 13px;
   }
-}
-
-/* =========================
-   MOBILE TABLE OPTIMIERUNG
-========================= */
-
-.table-scroll {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Tabellen bleiben breit */
-.lager-table {
-  min-width: 900px;
-}
-
-/* Sticky Header */
-.lager-table thead th {
-  position: sticky;
-  top: 0;
-  background: #fff6a3;
-  z-index: 2;
-}
-
-/* Touch-freundliche Zellen */
-.lager-table td,
-.lager-table th {
-  padding: 10px 8px;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-/* Edit-Icon besser klickbar */
-.edit-icon {
-  font-size: 18px;
-  padding: 6px;
-}
-
-/* Buttons mobil */
-button {
-  padding: 10px 14px;
-  font-size: 15px;
-  border-radius: 6px;
-}
-
-/* Überschrift sauber */
-.fs-title {
-  margin: 12px 0 8px;
-  font-size: 18px;
-}
-
-/* Kategorie-Zeilen */
-.category-row td {
-  font-size: 15px;
-  padding: 8px;
 }
 
 @media (max-width: 768px) {
-  .edit-icon {
-    opacity: 1;
+  #search {
+    width: 90%;
   }
 
-  .edit-wrapper {
-    justify-content: space-between;
-  }
-}
-/* Kompaktmodus (nur Mobile) */
-/* =========================
-   MOBILE KOMPAKTANSICHT
-========================= */
-@media (max-width: 768px) {
-
-  .lager-table thead {
-    display: none;
-  }
-
-  .lager-table,
-  .lager-table tbody,
-  .lager-table tr {
-    display: block;
+  button {
     width: 100%;
   }
 
-  .lager-table tr {
-    margin-bottom: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 8px;
-    background: #fff;
-  }
-
-  .lager-table td {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 4px;
-    border: none;
-    font-size: 14px;
-  }
-
-  .lager-table td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: #444;
-    margin-right: 10px;
-  }
-
-  .category-row td {
-    display: block;
-    text-align: center;
-    font-weight: bold;
-    background: #ffeb3b;
-    border-radius: 6px;
+  .ke-column-controls,
+  .fs-column-controls {
+    justify-content: flex-start;
   }
 }

@@ -22,6 +22,8 @@
 ========================= -->
 <div id="app" style="display:none">
         <h2>Materialliste</h2>
+        <button id="themeToggleBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
+
   <!-- Logout sperrt die komplette Liste wieder -->
         <button onclick="logout()">Logout</button>
 
@@ -48,8 +50,11 @@
             <div class="ke-column-controls">
               <label class="locked"><input type="checkbox" checked disabled> Material</label>
               <label><input type="checkbox" data-col="e" checked> E-Nummer</label>
+              <label><input type="checkbox" data-col="charge" checked>Charge-Nr.</label>
+              <label><input type="checkbox" data-col="palette" checked> Paletten-Nr.</label>
               <label><input type="checkbox" data-col="regal" checked> Regal</label>
               <label><input type="checkbox" data-col="bestand" checked> Bestandliste</label>
+              <label><input type="checkbox" data-col="bemerkung" checked>Bemerkung</label>
             </div>
         <!-- =========================
             MATERIAL LISTE
@@ -60,9 +65,11 @@
               <tr>
                 <th>Material</th>
                 <th>E-Nummer</th>
+                <th>Charge-Nr.</th>
+                <th>Paletten-Nr.</th>
                 <th>Regal</th>
                 <th>Bestandliste</th>
-                <th>Aktion</th>
+                <th>Bemerkung</th>
               </tr>
             </thead>
             <tbody id="tableBody"></tbody>

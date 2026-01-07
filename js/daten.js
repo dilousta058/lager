@@ -29,8 +29,11 @@ let fsVisible = false;
 const KE_COLUMN_MAP = {
   material: 0,
   e: 1,
-  regal: 2,
-  bestand: 3
+  charge: 2,
+  palette: 3,
+  regal: 4,
+  bestand: 5,
+  bemerkung: 6
 };
 
 /* =========================
@@ -289,6 +292,10 @@ function render() {
 
   tableBody.innerHTML = "";
 
+  // ✅ HIER EINMALIG DEFINIEREN
+  const colCount =
+    document.querySelector(".KE-table thead tr").children.length;
+
   const query = parseQuery(search.value);
   const catFilter = categoryFilter.value;
   const noSearch = Object.keys(query).length === 0;
@@ -311,7 +318,7 @@ function render() {
 
     if (m.cat !== lastCat) {
       tableBody.innerHTML +=
-        `<tr class="category"><td colspan="5">${m.cat}</td></tr>`;
+        `<tr class="category"><td colspan="${colCount}">${m.cat}</td></tr>`;
       lastCat = m.cat;
     }
 
@@ -319,13 +326,16 @@ function render() {
       <tr>
         ${cell(highlight(m.material, query.material || query.all), i, "material")}
         ${cell(highlight(m.e, query.e || query.all), i, "e")}
+        ${cell(m.charge, i, "charge")}
+        ${cell(m.palette, i, "palette")}
         ${cell(highlight(m.shelf, query.regal || query.all), i, "shelf")}
         ${cell(m.bestand, i, "bestand")}
-        <td></td>
+        ${cell(m.bemerkung, i, "bemerkung")}
       </tr>
     `;
   });
 }
+
 
 /* =====================================================
    INLINE EDIT
@@ -414,6 +424,40 @@ function reapplyKEColumns() {
 }
 
 
+/* =====================================================
+   DARK / LIGHT MODE
+===================================================== */
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+
+  if (current === "dark") {
+    document.documentElement.removeAttribute("data-theme");
+    localStorage.setItem("theme", "light");
+    updateThemeButton();
+  } else {
+    document.documentElement.setAttribute("data-theme", "dark");
+    localStorage.setItem("theme", "dark");
+    updateThemeButton();
+  }
+}
+
+function updateThemeButton() {
+  const btn = document.getElementById("themeToggleBtn");
+  if (!btn) return;
+
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  btn.textContent = dark ? "☀️ Light Mode" : "🌙 Dark Mode";
+}
+
+/* Beim Laden wiederherstellen */
+document.addEventListener("DOMContentLoaded", () => {
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+  updateThemeButton();
+});
 
 
 syncUI();
@@ -431,3 +475,4 @@ document.addEventListener("DOMContentLoaded", () => {
     updateToggleButton?.();
   }
 });
+
