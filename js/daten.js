@@ -93,17 +93,16 @@ function login() {
 function logout() {
   loggedIn = false;
   listVisible = false;
+  fsVisible = false;
   editEnabled = false;
   /* Beim Logout Session korrekt beenden */
   sessionStorage.removeItem("loggedIn");
-
 
    // KE sperren
     document.getElementById("KeSection").style.display = "none";
     document.getElementById("toggleListBtn").style.display = "none";
 
-    // FS sperren
-    fsVisible = false;
+
     document.getElementById("fsSection").style.display = "none";
     document.getElementById("fsToggleBtn").style.display = "none";
 

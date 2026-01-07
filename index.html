@@ -21,14 +21,13 @@
      GESCHÜTZTE APP
 ========================= -->
 <div id="app" style="display:none">
-        <!-- Logout sperrt die komplette Liste wieder -->
+        <h2>Materialliste</h2>
+  <!-- Logout sperrt die komplette Liste wieder -->
         <button onclick="logout()">Logout</button>
 
         <!-- Button: komplette Liste anzeigen / ausblenden -->
         <button id="toggleListBtn" onclick="toggleKE()">📋 Rohstoffliste anzeigen</button>
-        <button id="fsToggleBtn"  onclick="toggleFS()"  style="display:none">FS-Liste anzeigen</button>
-        <h2>Materialliste</h2>
-
+        <button id="fsToggleBtn"  onclick="toggleFS()">FS-Liste anzeigen</button>
         <!-- Key-Freischaltung -->
         <input id="keyInput" type="password" placeholder="Key eingeben">
         <button id="unlockBtn" onclick="unlockEditing()">Freischalten</button>
