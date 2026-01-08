@@ -338,17 +338,34 @@ function render() {
       lastCat = m.cat;
     }
 
-    tableBody.innerHTML += `
-      <tr>
-        ${cell(highlight(m.material, query.material || query.all), i, "material")}
-        ${cell(highlight(m.e, query.e || query.all), i, "e")}
-        ${cell(m.charge, i, "charge")}
-        ${cell(m.palette, i, "palette")}
-        ${cell(highlight(m.shelf, query.regal || query.all), i, "shelf")}
-        ${cell(m.bestand, i, "bestand")}
-        ${cell(m.bemerkung, i, "bemerkung")}
-      </tr>
-    `;
+      tableBody.innerHTML += `
+        <tr class="${m._isDefault ? 'default-row' : ''}">
+          <!-- ➕ LINKS -->
+          <td class="row-action left">
+            <span class="row-btn add" onclick="addRowAfter(${i})">＋</span>
+            ${
+              m._isDefault
+                ? `<span class="row-lock" title="Standard-Eintrag (nicht löschbar)">🔒</span>`
+                : ""
+            }
+          </td>
+                ${cell(highlight(m.material, query.material || query.all), i, "material")}
+                ${cell(highlight(m.e, query.e || query.all), i, "e")}
+                ${cell(m.charge, i, "charge")}
+                ${cell(m.palette, i, "palette")}
+                ${cell(highlight(m.shelf, query.regal || query.all), i, "shelf")}
+                ${cell(m.bestand, i, "bestand")}
+                ${cell(m.bemerkung, i, "bemerkung")}
+          <!-- ➖ RECHTS -->
+            <td class="row-action right">
+              ${
+                !m._isDefault
+                  ? `<span class="row-btn remove" onclick="removeRow(${i})">−</span>`
+                  : ""
+              }
+            </td>
+        </tr>
+      `;
   });
 }
 
@@ -438,6 +455,55 @@ function reapplyKEColumns() {
   document.querySelectorAll(".ke-column-controls input")
     .forEach(cb => cb.dispatchEvent(new Event("change")));
 }
+
+/* Zeile hinzufügen*/
+function addRowAfter(index) {
+  if (!loggedIn) return;
+  // optional: if (!isAdmin) return;
+
+  const base = data[index];
+
+  const newRow = {
+    cat: base.cat,
+    material: base.material,
+    e: base.e,
+    charge: "",
+    palette: "",
+    shelf: "",
+    bestand: "",
+    bemerkung: "",
+    _isDefault: false,
+    _isClone: true
+  };
+
+  data.splice(index + 1, 0, newRow);
+
+  save();
+  render();
+}
+
+/*Zeile löschen*/
+function removeRow(index) {
+  if (!loggedIn) return;
+
+  const row = data[index];
+
+  // ❌ Default-Zeilen niemals löschen
+  if (row._isDefault) {
+    alert("Dieser Standard-Eintrag kann nicht gelöscht werden.");
+    return;
+  }
+
+  const ok = confirm("Diese Zeile wirklich löschen?");
+  if (!ok) return;
+
+  data.splice(index, 1);
+
+  save();
+  render();
+}
+
+
 
 
 /* =====================================================

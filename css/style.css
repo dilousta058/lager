@@ -81,6 +81,73 @@ input, select {
 .admin-btn.danger:hover {
   background: #b71c1c;
 }
+/* =========================
+   ZEILEN-AKTIONEN (+ / -)
+========================= */
+
+.row-action {
+  width: 40px;
+  min-width: 40px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.row-btn {
+  display: inline-block;
+  font-size: 18px;
+  font-weight: bold;
+  color: #1f2937; /* sichtbar */
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+.row-btn.add {
+  color: #2563eb;
+}
+
+.row-btn.remove {
+  color: #dc2626;
+}
+
+.row-lock {
+  font-size: 14px;
+  margin-left: 4px;
+  opacity: 0.7;
+}
+
+
+/* =========================
+   DEFAULT-ZEILEN (gesperrt)
+========================= */
+
+tr.default-row {
+  opacity: 0.85;
+}
+
+.row-lock {
+  cursor: not-allowed;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* Plus / Minus Buttons */
+.row-btn {
+  cursor: pointer;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 6px;
+  user-select: none;
+}
+
+.row-btn.add:hover {
+  background: #e0f0ff;
+}
+
+.row-btn.remove:hover {
+  background: #ffe0e0;
+}
 
 /* =====================================================
    BUTTONS – WINDOWS 11 STYLE
