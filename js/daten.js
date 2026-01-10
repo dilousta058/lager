@@ -1,14 +1,24 @@
+/* =====================================================
+   GLOBALE DOM-REFERENZEN (ROBUSTE FALLBACKS)
+===================================================== */
+const app = document.getElementById("app");
+const loginBox = document.getElementById("loginBox");
+const userInput = document.getElementById("userInput");
+const passInput = document.getElementById("passInput");
+const keyInput = document.getElementById("keyInput");
+const unlockBtn = document.getElementById("unlockBtn");
+const status = document.getElementById("status");
 
-/* =========================
-   SAFE EVENT BINDING HELPER
-========================= */
+const tableBody = document.getElementById("tableBody");
+const search = document.getElementById("search");
+const categoryFilter = document.getElementById("categoryFilter");
+
+/* =====================================================
+   SAFE EVENT BINDING
+===================================================== */
 function safeOn(el, evt, fn) {
-  if (el && el.addEventListener) {
-    el.addEventListener(evt, fn);
-  }
+  if (el && el.addEventListener) el.addEventListener(evt, fn);
 }
-
-
 
 /* =====================================================
    KONFIGURATION
@@ -20,23 +30,17 @@ const LOGIN_PASS = "64579";
 const EDIT_KEY = "64579";
 const AUTO_LOCK_MINUTES = 10;
 const PROTECTED_FIELDS = ["material", "e"];
-const IS_ADMIN = true;
 
 /* =====================================================
    STATUS
 ===================================================== */
-let listVisible = false;
 let editEnabled = localStorage.getItem("editEnabled") === "true";
 let lockTimer = null;
-let fsVisible = false;
 let loggedIn = sessionStorage.getItem("loggedIn") === "true";
-let isAdmin  = loggedIn; // Admin-Login = gleiches Konto
-
-
-
+let isAdmin = loggedIn;
 
 /* =====================================================
-   KE-TABELLE – SPALTENZUORDNUNG (MIT AKTIONS-SPALTEN)
+   COLUMN MAPS
 ===================================================== */
 const KE_COLUMN_MAP = {
   material: 1,
@@ -48,272 +52,236 @@ const KE_COLUMN_MAP = {
   bemerkung: 7
 };
 
-
-/* =========================
-   FS – SPALTENINDEX
-========================= */
 const FS_COLUMN_MAP = {
   kurz: 0,
   bezeichnung: 1,
   material: 2,
   stueck: 3,
-  e: 4,
+  eNummer: 4,
   kuerzel: 5,
   bestand: 6,
   dpc: 7
 };
 
-
 /* =====================================================
-   DATEN
-===================================================== */
-/* =====================================================
-   DATEN (INITIAL + STORAGE GETRENNT)
+   DATEN LADEN
 ===================================================== */
 let data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-
 if (!Array.isArray(data)) {
-  data = structuredClone(defaultData); // oder DEFAULT_KE_DATA
+  data = structuredClone(defaultData);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-
 /* =====================================================
-   LOGIN – ENTER-FÄHIG / SESSION-SICHER
-   (angepasst an bestehende Logik, ungekürzt)
+   LOGIN / LOGOUT
 ===================================================== */
 function login(e) {
-  // ✅ Enter aus Formular abfangen (kein Seiten-Reload)
   if (e) e.preventDefault();
 
   const user = userInput.value.trim();
   const pass = passInput.value.trim();
 
-  // ❌ einfache Validierung
-  if (!user || !pass) {
-    alert("Bitte Benutzer und Passwort eingeben");
-    return;
-  }
-
-  // ✅ Login-Prüfung
   if (user === LOGIN_USER && pass === LOGIN_PASS) {
     loggedIn = true;
-    isAdmin = true;   // ✅ Admin-Rechte setzen
-
-    /* sessionStorage:
-       - bleibt bei Reload (F5) erhalten
-       - endet bei Tab / Browser schließen */
+    isAdmin = true;
     sessionStorage.setItem("loggedIn", "true");
 
-    // 🔒 Login-UI ausblenden
     loginBox.style.display = "none";
     app.style.display = "block";
 
-    // Tabelle initial leeren
-    tableBody.innerHTML = "";
-
-    // 🔓 KE-Bereich freigeben
-    document.getElementById("toggleListBtn").style.display = "inline-block";
-
-    // 🔓 FS-Bereich freigeben
-    document.getElementById("fsToggleBtn").style.display = "inline-block";
-
-    // Beide Listen initial verborgen
-    document.getElementById("KeSection").style.display = "none";
-    document.getElementById("fsSection").style.display = "none";
-    document.getElementById("historySection").style.display = "none";
-
-    listVisible = false;
-    fsVisible = false;
-
-    // 🔧 Admin-Reset-Button anzeigen
-    document.getElementById("resetMaterialDataBtn").style.display = "inline-block";
-
-    /* 📜 Änderungshistorie nur für Admin sichtbar */
-    if (user === LOGIN_USER) {
-      document.getElementById("historySection").style.display = "block";
-    }
-
-    // 🔄 Initialisierungen
-    initCategories();     // Kategorien laden
-    syncUI();             // UI-Zustand synchronisieren
-    updateToggleButton(); // Toggle-Buttons aktualisieren
-    syncAdminUI();        // Admin-spezifische UI
-
+    initCategories();
+    syncUI();
+    syncAdminUI();
+    TabController.init();
   } else {
     alert("Login fehlgeschlagen");
   }
 }
 
-
 function logout() {
-  loggedIn = false;
-  isAdmin = false;
-
-  listVisible = false;
-  fsVisible = false;
-  editEnabled = false;
-  /* Beim Logout Session korrekt beenden */
   sessionStorage.removeItem("loggedIn");
+  localStorage.removeItem("editEnabled");
 
-   // KE sperren
-    document.getElementById("KeSection").style.display = "none";
-    document.getElementById("toggleListBtn").style.display = "none";
+  loggedIn = false;
+  editEnabled = false;
 
-
-    document.getElementById("fsSection").style.display = "none";
-    document.getElementById("fsToggleBtn").style.display = "none";
-    document.getElementById("resetMaterialDataBtn").style.display = "none";
-    document.getElementById("historySection").style.display = "none";
-
-    
-    localStorage.removeItem("editEnabled");
-    app.style.display = "none";
-    loginBox.style.display = "block";
-    tableBody.innerHTML = "";
-    syncAdminUI();
-}
-
-/* Enter auslösen */
-document.getElementById("loginForm").addEventListener("submit", e => {
-  e.preventDefault();   // verhindert Seitenreload
-  login();              // deine bestehende Login-Funktion
-});
-
-
-/* =====================================================
-   LISTE EIN / AUS
-===================================================== */
-
-
-function toggleKE() {
-  TabController.show('ke');
-  return;
-
-  if (!loggedIn) return;
-
-  listVisible = !listVisible;
-
-  const KeSection = document.getElementById("KeSection");
-  const btn = document.getElementById("toggleListBtn");
-
-  if (listVisible) {
-    KeSection.style.display = "block";
-    render();                 // 🔴 FEHLTE
-    reapplyKEColumns();       // 🔴 FEHLTE
-  } else {
-    KeSection.style.display = "none";
-    tableBody.innerHTML = "";
-  }
-
-  btn.textContent = listVisible
-    ? "📋 Rohstoffliste ausblenden"
-    : "📋 Rohstoffliste anzeigen";
-}
-
-
-function toggleFS() {
-  TabController.show('fs');
-  return;
-
-  if (!loggedIn) return;
-
-  fsVisible = !fsVisible;
-
-  const fsSection = document.getElementById("fsSection");
-  const btn = document.getElementById("fsToggleBtn");
-
-  fsSection.style.display = fsVisible ? "block" : "none";
-  btn.textContent = fsVisible
-    ? "FS-Liste ausblenden"
-    : "FS-Liste anzeigen";
-}
-
-function updateToggleButton() {
-  const toggleListBtn = document.getElementById("toggleListBtn");
-  if (!toggleListBtn) return; // Tabs aktiv → kein Toggle-Button
+  app.style.display = "none";
+  loginBox.style.display = "block";
 }
 
 /* =====================================================
-   HISTORIE ANZEIGE
+   TAB CONTROLLER (BEREINIGT)
 ===================================================== */
+window.TabController = (() => {
+  const tabs = {
+    ke: {
+      section: "keSection",
+      render: () => {
+        render();
+        reapplyKEColumns();
+      }
+    },
+    fs: {
+      section: "fsSection",
+      render: () => {
+    if (window.renderFS) {
+      window.renderFS();
+    } else {
+      console.warn("renderFS() noch nicht geladen");
+    }
+      }
+    },
+    history: {
+      section: "historySection",
+      render: () => {
+        if (editEnabled) renderHistory();
+      }
+    }
+  };
 
-function toggleHistory() {
-  if (!editEnabled) {
-    alert("Nur für Administratoren sichtbar.");
-    return;
+  let active = "ke";
+
+  function show(tab) {
+    if (!tabs[tab]) return;
+    active = tab;
+
+    Object.entries(tabs).forEach(([key, cfg]) => {
+      const el = document.getElementById(cfg.section);
+      if (el) el.classList.toggle("active", key === tab);
+    });
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.tab === tab);
+    });
+
+    tabs[tab].render();
+    localStorage.setItem("activeTab", tab);
   }
 
-  const table = document.getElementById("historyTable");
-  table.style.display = table.style.display === "none" ? "table" : "none";
-  if (table.style.display === "table") renderHistory();
-}
+  function init() {
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => show(btn.dataset.tab));
+    });
 
-function renderHistory() {
-  const body = document.getElementById("historyBody");
-  body.innerHTML = "";
+    const saved = localStorage.getItem("activeTab") || "ke";
+    show(saved);
+  }
 
-  const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+  return { init, show };
+})();
 
-  history.slice().reverse().forEach(h => {
-    body.innerHTML += `
-      <tr>
-        <td>${new Date(h.time).toLocaleString()}</td>
-        <td>${h.field}</td>
-        <td>${h.oldValue ?? ""}</td>
-        <td>${h.newValue ?? ""}</td>
+/* =====================================================
+   KE RENDERING
+===================================================== */
+function render() {
+  if (!loggedIn) return;
+  tableBody.innerHTML = "";
+
+  let lastCat = null;
+
+  data.forEach(m => {
+    if (m.cat !== lastCat) {
+      tableBody.innerHTML +=
+        `<tr class="category"><td colspan="9">${m.cat}</td></tr>`;
+      lastCat = m.cat;
+    }
+
+    tableBody.innerHTML += `
+      <tr class="data-row ${row._isDefault ? "default-row" : ""}">
+        <td></td>
+        <td>${m.material || ""}</td>
+        <td>${m.e || ""}</td>
+        <td>${m.charge || ""}</td>
+        <td>${m.palette || ""}</td>
+        <td>${m.shelf || ""}</td>
+        <td>${m.bestand || ""}</td>
+        <td>${m.bemerkung || ""}</td>
+        <td></td>
       </tr>
     `;
   });
 }
 
 /* =====================================================
-   HISTORIE LÖSCHEN
+   SPALTEN TOGGLE – KE
 ===================================================== */
+function toggleKEColumn(colIndex, visible) {
+  document.querySelectorAll(".KE-table tr").forEach(row => {
+    const cell = row.children[colIndex];
+    if (cell) cell.style.display = visible ? "" : "none";
+  });
+}
 
-function clearHistory() {
-  if (!editEnabled) {
-    alert("Keine Berechtigung.");
-    return;
+function reapplyKEColumns() {
+  document
+    .querySelectorAll(".ke-column-controls input[type=checkbox]")
+    .forEach(cb => cb.dispatchEvent(new Event("change")));
+}
+
+/* =====================================================
+   HISTORY
+===================================================== */
+function renderHistory() {
+  const body = document.getElementById("historyBody");
+  body.innerHTML = "";
+
+  const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+  history.slice().reverse().forEach(h => {
+    body.innerHTML += `
+      <tr>
+        <td>${new Date(h.time).toLocaleString()}</td>
+        <td>${h.field}</td>
+        <td>${h.oldValue || ""}</td>
+        <td>${h.newValue || ""}</td>
+      </tr>
+    `;
+  });
+}
+
+/* =====================================================
+   UI
+===================================================== */
+function syncUI() {
+  unlockBtn.disabled = editEnabled;
+  status.textContent = editEnabled
+    ? "🔓 Bearbeitung aktiv"
+    : "🔒 Gesperrt!";
+}
+
+function syncAdminUI() {
+  const btn = document.getElementById("resetMaterialDataBtn");
+  if (btn) btn.style.display = editEnabled ? "inline-block" : "none";
+}
+
+/* =====================================================
+   START
+===================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  if (loggedIn) {
+    loginBox.style.display = "none";
+    app.style.display = "block";
+
+    initCategories();      // ✅ FEHLTE
+    syncUI();
+    syncAdminUI();
+
+    TabController.init();
   }
-
-  if (!confirm("Soll die gesamte Änderungshistorie gelöscht werden?")) return;
-
-  localStorage.removeItem(HISTORY_KEY);
-  document.getElementById("historyBody").innerHTML = "";
-}
-
-
-
-
+});
 /* =====================================================
-   STORAGE
-===================================================== */
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-function saveHistory(entry) {
-  const h = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
-  h.push(entry);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
-}
-
-/* =====================================================
-   KEY-STEUERUNG
+   EDIT-LOCK / AUTO-LOCK
 ===================================================== */
 function unlockEditing() {
   if (keyInput.value !== EDIT_KEY) {
-        alert("Falscher Key");
-        return;
-      }
+    alert("Falscher Key");
+    return;
+  }
+
   editEnabled = true;
   localStorage.setItem("editEnabled", "true");
   startAutoLock();
   syncUI();
-  render();
-  reapplyKEColumns();
-  syncAdminUI();   // 🔑 Button einblenden
+  syncAdminUI();
 }
 
 function lockEditing() {
@@ -321,80 +289,42 @@ function lockEditing() {
   localStorage.removeItem("editEnabled");
   clearTimeout(lockTimer);
   syncUI();
-  render();
-  reapplyKEColumns();
-  syncAdminUI();   // 🔑 Button einblenden
+  syncAdminUI();
 }
 
 function startAutoLock() {
   clearTimeout(lockTimer);
-  lockTimer = setTimeout(lockEditing, AUTO_LOCK_MINUTES * 60000);
+  lockTimer = setTimeout(
+    lockEditing,
+    AUTO_LOCK_MINUTES * 60000
+  );
 }
 
-function syncUI() {
-  unlockBtn.disabled = editEnabled;
-  status.textContent = editEnabled
-    ? "🔓 Bearbeitung aktiv"
-    : "🔒 Geschützt";
-}
+/* Auto-Lock bei Aktivität */
+["click", "keydown", "mousemove"].forEach(evt =>
+  document.addEventListener(evt, () => {
+    if (editEnabled) startAutoLock();
+  })
+);
 
 /* =====================================================
-   SICHTBARE KE-SPALTEN ZÄHLEN
-===================================================== */
-function getVisibleKEColumnCount() {
-  const table = document.querySelector(".KE-table");
-  if (!table) return 1;
-
-  const headerCells = table.querySelectorAll("thead th");
-  let count = 0;
-
-  headerCells.forEach(th => {
-    if (th.style.display !== "none") {
-      count++;
-    }
-  });
-
-  return count;
-}
-
-/* =====================================
-   KE – KOMPLETTE SPALTE EIN / AUS - 
-================================= */
-function toggleKEColumn(colIndex, visible) {
-  const table = document.querySelector(".KE-table");
-  if (!table) return;
-
-  table.querySelectorAll("tr").forEach(row => {
-    const cell = row.children[colIndex];
-    if (cell) {
-      cell.style.display = visible ? "" : "none";
-    }
-  });
-}
-
-/* =========================
-   FS – KOMPLETTE SPALTE EIN / AUS
-========================= */
-function toggleFSColumn(colIndex, visible) {
-  const table = document.querySelector(".fs-table");
-  if (!table) return;
-
-  table.querySelectorAll("tr").forEach(row => {
-    const cell = row.children[colIndex];
-    if (cell) {
-      cell.style.display = visible ? "" : "none";
-    }
-  });
-}
-
-
-
-/* =====================================================
-   KATEGORIEN INITIALISIEREN
+   KATEGORIEN (KE)
 ===================================================== */
 function initCategories() {
-  categoryFilter.innerHTML = '<option value="">Alle Kategorien</option>';
-  [...new Set(data.map(d => d.cat))].forEach(cat => {
+  if (!categoryFilter || !Array.isArray(data)) return;
+
+  categoryFilter.innerHTML =
+    '<option value="">Alle Kategorien</option>';
+
+  const cats = [
+    ...new Set(
+      data
+        .map(d => d.cat)
+        .filter(Boolean)
+    )
+  ];
+
+  cats.forEach(cat => {
     const opt = document.createElement("option");
     opt.value = cat;
     opt.textContent = cat;
@@ -402,243 +332,169 @@ function initCategories() {
   });
 }
 
+
 /* =====================================================
-   SUCHE
+   SUCHE (KE)
 ===================================================== */
 function parseQuery(q) {
   const obj = {};
   if (!q || !q.trim()) return obj;
 
   q.trim().split(/\s+/).forEach(p => {
-    const [k, v] = p.includes(":") ? p.split(":") : ["all", p];
+    const [k, v] = p.includes(":")
+      ? p.split(":")
+      : ["all", p];
     if (v) obj[k] = v.toLowerCase();
   });
 
   return obj;
 }
 
-function highlight(text, q) {
-  if (!q) return text;
-  return text.replace(
-    new RegExp(`(${q})`, "gi"),
-    '<span class="highlight">$1</span>'
-  );
-}
-
-
 /* =====================================================
-   RENDERING MIT KATEGORIEN (1:1 LOGIK WIE FRÜHER)
+   HISTORY – TOGGLE / CLEAR
 ===================================================== */
-function render() {
-  if (!loggedIn) return;
+function toggleHistory() {
+  if (!editEnabled) {
+    alert("Nur für Administratoren.");
+    return;
+  }
 
-  tableBody.innerHTML = "";
+  const table = document.getElementById("historyTable");
+  if (!table) return;
 
-  // ✅ HIER EINMALIG DEFINIEREN
-  const colCount =
-    document.querySelector(".KE-table thead tr").children.length;
+  table.style.display =
+    table.style.display === "none"
+      ? "table"
+      : "none";
 
-  const query = parseQuery(search.value);
-  const catFilter = categoryFilter.value;
-  const noSearch = Object.keys(query).length === 0;
-
-  let lastCat = null;
-
-  data.forEach((m, i) => {
-    if (catFilter && m.cat !== catFilter) return;
-
-    const hay = (m.material + m.e + m.shelf).toLowerCase();
-
-    const hit =
-      noSearch ||
-      (query.material && m.material.toLowerCase().includes(query.material)) ||
-      (query.e && m.e.toLowerCase().includes(query.e)) ||
-      (query.regal && m.shelf.toLowerCase().includes(query.regal)) ||
-      (query.all && hay.includes(query.all));
-
-    if (!hit) return;
-
-    if (m.cat !== lastCat) {
-      const colCount = document
-        .querySelector(".KE-table thead tr")
-        .querySelectorAll("th:not([style*='display: none'])")
-        .length;
-
-      tableBody.innerHTML +=
-        `<tr class="category"><td colspan="${colCount}">${m.cat}</td></tr>`;
-      lastCat = m.cat;
-    }
-
-      tableBody.innerHTML += `
-        <tr class="${m._isDefault ? 'default-row' : ''}">
-          <!-- ➕ LINKS -->
-          <td class="row-action left">
-            <span class="row-btn add" onclick="addRowAfter(${i})">＋</span>
-            ${
-              m._isDefault
-                ? `<span class="row-lock" title="Standard-Eintrag (nicht löschbar)">🔒</span>`
-                : ""
-            }
-          </td>
-                ${cell(highlight(m.material, query.material || query.all), i, "material")}
-                ${cell(highlight(m.e, query.e || query.all), i, "e")}
-                ${cell(m.charge, i, "charge")}
-                ${cell(m.palette, i, "palette")}
-                ${cell(highlight(m.shelf, query.regal || query.all), i, "shelf")}
-                ${cell(m.bestand, i, "bestand")}
-                ${cell(m.bemerkung, i, "bemerkung")}
-          <!-- ➖ RECHTS -->
-            <td class="row-action right">
-              ${
-                !m._isDefault
-                  ? `<span class="row-btn remove" onclick="removeRow(${i})">−</span>`
-                  : ""
-              }
-            </td>
-        </tr>
-      `;
-  });
-}
-
-
-/* =====================================================
-   INLINE EDIT
-===================================================== */
-function cell(value, index, field) {
-  const protectedField = PROTECTED_FIELDS.includes(field);
-  const canEdit = !protectedField || editEnabled;
-
-  return `
-    <td class="${protectedField ? "protected" : ""}">
-      <div class="edit-wrapper">
-        <span>${value}</span>
-        ${
-          canEdit
-            ? `<span class="edit-icon" onclick="editCell(this, ${index}, '${field}')">✏️</span>`
-            : ""
-        }
-      </div>
-    </td>
-  `;
-}
-
-/* =====================================================
-   ZELLE EDITIEREN – ENTER + MOBILE-BUTTON
-===================================================== */
-function editCell(icon, index, field) {
-  // 🔒 Geschützte Felder nur bei freigegebenem Edit
-  if (PROTECTED_FIELDS.includes(field) && !editEnabled) return;
-
-  // Aktuelle Tabellenzelle ermitteln
-  const td = icon.closest("td");
-  if (!td) return;
-
-  const oldValue = data[index][field];
-
-  // Edit-UI erzeugen
-  td.innerHTML = `
-    <div class="edit-wrapper">
-      <input class="edit-input" value="${oldValue || ""}">
-      <button class="edit-apply" type="button">Übernehmen</button>
-    </div>
-  `;
-
-  const input = td.querySelector(".edit-input");
-  const btn   = td.querySelector(".edit-apply");
-
-  if (!input) return;
-
-  input.focus();
-
-  // Zentrale Commit-Funktion (EINMAL definiert)
-  const commitEdit = () => {
-    const newValue = input.value;
-
-    // Nur speichern, wenn sich wirklich etwas geändert hat
-    if (newValue !== oldValue) {
-      data[index][field] = newValue;
-      save();
-
-      saveHistory({
-        time: new Date().toISOString(),
-        field,
-        oldValue,
-        newValue
-      });
-    }
-
-    render();
-    reapplyKEColumns();
-  };
-
-  // ✅ ENTER-Taste bestätigt
-  input.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      commitEdit();
-    }
-  });
-
-  // ✅ Fokus-Verlust bestätigt (Desktop-Klick außerhalb)
-  input.addEventListener("blur", () => {
-    commitEdit();
-  });
-
-  // ✅ Mobile-Button bestätigt (falls sichtbar)
-  if (btn) {
-    btn.addEventListener("click", e => {
-      e.preventDefault();
-      commitEdit();
-    });
+  if (table.style.display === "table") {
+    renderHistory();
   }
 }
 
+function clearHistory() {
+  if (!editEnabled) {
+    alert("Keine Berechtigung.");
+    return;
+  }
 
-/* =====================================================
-   EVENTS & START
-===================================================== */
-function debounce(fn, delay = 300) {
-  let t;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn.apply(null, args), delay);
-  };
+  if (!confirm("Historie wirklich löschen?")) return;
+
+  localStorage.removeItem(HISTORY_KEY);
+  document.getElementById("historyBody").innerHTML = "";
 }
 
-const debouncedRender = debounce(render, 300);
+/* =====================================================
+   STORAGE HELPERS
+===================================================== */
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
 
-safeOn(search,("input", debouncedRender));
-safeOn(categoryFilter,("change", render));
+function saveHistory(entry) {
+  const h =
+    JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+  h.push(entry);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+}
 
-["click", "keydown", "mousemove"].forEach(evt =>
-  document.addEventListener(evt, () => {
-    if (editEnabled) startAutoLock();
-  })
-);
+/* =====================================================
+   ADMIN: RESET DATEN
+===================================================== */
+function resetMaterialData() {
+  if (!loggedIn || !isAdmin) return;
 
-/* Listener KE/WA ...*/
-document.querySelectorAll(".ke-column-controls input[type=checkbox]")
+  const ok = confirm(
+    "ACHTUNG!\n\nAlle Daten werden zurückgesetzt."
+  );
+  if (!ok) return;
+
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+/* =====================================================
+   DARK / LIGHT MODE
+===================================================== */
+function toggleTheme() {
+  const root = document.documentElement;
+  const dark = root.getAttribute("data-theme") === "dark";
+
+  if (dark) {
+    root.removeAttribute("data-theme");
+    localStorage.setItem("theme", "light");
+  } else {
+    root.setAttribute("data-theme", "dark");
+    localStorage.setItem("theme", "dark");
+  }
+
+  updateThemeButton();
+}
+
+function updateThemeButton() {
+  const btn = document.getElementById("themeToggleBtn");
+  if (!btn) return;
+
+  const dark =
+    document.documentElement.getAttribute("data-theme") === "dark";
+
+  btn.textContent = dark
+    ? "☀️ Light Mode"
+    : "🌙 Dark Mode";
+}
+
+/* =====================================================
+   THEME INIT
+===================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+  updateThemeButton();
+});
+
+/* =====================================================
+   KE – SUCH & FILTER EVENTS
+===================================================== */
+const debouncedRender = (() => {
+  let t;
+  return () => {
+    clearTimeout(t);
+    t = setTimeout(render, 250);
+  };
+})();
+
+safeOn(search, "input", () => {
+  if (TabController?.show && TabController) {
+    render();
+  }
+});
+
+safeOn(categoryFilter, "change", () => {
+  render();
+});
+
+/* =====================================================
+   KE – SPALTEN CHECKBOXEN
+===================================================== */
+document
+  .querySelectorAll(".ke-column-controls input[type=checkbox]")
   .forEach(cb => {
     cb.addEventListener("change", () => {
       const key = cb.dataset.col;
       const colIndex = KE_COLUMN_MAP[key];
-
       if (colIndex !== undefined) {
         toggleKEColumn(colIndex, cb.checked);
       }
     });
   });
 
-
-function reapplyKEColumns() {
-  document.querySelectorAll(".ke-column-controls input")
-    .forEach(cb => cb.dispatchEvent(new Event("change")));
-}
-
-/* Zeile hinzufügen*/
+/* =====================================================
+   KE – ZEILE HINZUFÜGEN
+===================================================== */
 function addRowAfter(index) {
   if (!loggedIn) return;
-  // optional: if (!isAdmin) return;
 
   const base = data[index];
 
@@ -656,209 +512,425 @@ function addRowAfter(index) {
   };
 
   data.splice(index + 1, 0, newRow);
-
   save();
   render();
+  reapplyKEColumns();
 }
 
-/*Zeile löschen*/
+/* =====================================================
+   KE – ZEILE LÖSCHEN
+===================================================== */
 function removeRow(index) {
   if (!loggedIn) return;
-
-  const row = data[index];
-
+  
   // ❌ Default-Zeilen niemals löschen
+  const row = data[index];
   if (row._isDefault) {
-    alert("Dieser Standard-Eintrag kann nicht gelöscht werden.");
+    alert("Standard-Einträge können nicht gelöscht werden.");
     return;
   }
 
-  const ok = confirm("Diese Zeile wirklich löschen?");
-  if (!ok) return;
+  if (!confirm("Diese Zeile wirklich löschen?")) return;
 
   data.splice(index, 1);
-
   save();
   render();
+  reapplyKEColumns();
 }
-
-
-
 
 /* =====================================================
-   DARK / LIGHT MODE
+   KE – INLINE EDIT
 ===================================================== */
+function cell(value, index, field) {
+  const protectedField = PROTECTED_FIELDS.includes(field);
+  const canEdit = !protectedField || editEnabled;
 
-function toggleTheme() {
-  const current = document.documentElement.getAttribute("data-theme");
-
-  if (current === "dark") {
-    document.documentElement.removeAttribute("data-theme");
-    localStorage.setItem("theme", "light");
-    updateThemeButton();
-  } else {
-    document.documentElement.setAttribute("data-theme", "dark");
-    localStorage.setItem("theme", "dark");
-    updateThemeButton();
-  }
+  return `
+    <td class="${protectedField ? "protected" : ""}">
+      <div class="edit-wrapper">
+        <span>${value ?? ""}</span>
+        ${
+          canEdit
+            ? `<span class="edit-icon"
+                 onclick="editCell(this, ${index}, '${field}')">✏️</span>`
+            : ""
+        }
+      </div>
+    </td>
+  `;
 }
 
-function updateThemeButton() {
-  const btn = document.getElementById("themeToggleBtn");
-  if (!btn) return;
+function editCell(icon, index, field) {
+  if (PROTECTED_FIELDS.includes(field) && !editEnabled) return;
 
-  const dark = document.documentElement.getAttribute("data-theme") === "dark";
-  btn.textContent = dark ? "☀️ Light Mode" : "🌙 Dark Mode";
-}
+  const td = icon.closest("td");
+  if (!td) return;
 
+  const oldValue = data[index][field] ?? "";
 
-syncUI();
-updateToggleButton();
+  td.innerHTML = `
+    <div class="edit-wrapper">
+      <input class="edit-input" value="${oldValue}">
+      <button class="edit-apply" type="button">Übernehmen</button>
+    </div>
+  `;
 
+  const input = td.querySelector(".edit-input");
+  const btn = td.querySelector(".edit-apply");
+  input.focus();
 
-document.addEventListener("DOMContentLoaded", () => {
-    const savedTheme = localStorage.getItem("theme");
-  if (savedTheme === "dark") {
-    document.documentElement.setAttribute("data-theme", "dark");
-  }
-
-  if (sessionStorage.getItem("loggedIn") === "true") {
-    loggedIn = true;
-    isAdmin = true; // ✅ 
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("app").style.display = "block";
-
-    if (loginBox) {
-      loginBox.style.display = "none";
+  const commit = () => {
+    const newValue = input.value;
+    if (newValue !== oldValue) {
+      data[index][field] = newValue;
+      save();
+      saveHistory({
+        time: new Date().toISOString(),
+        field,
+        oldValue,
+        newValue
+      });
     }
-    app.style.display = "block";
-
-    // Sichtbarkeit korrekt setzen
-    const ke = document.getElementById("fsSection");
-    if (ke) {
-      ke.style.display = "none";
-    }
-    const fs = document.getElementById("fsSection");
-    if (fs) {
-      fs.style.display = "none";
-    
-    }
-    const historyTable = document.getElementById("historySection");
-    if (historyTable) {
-      historyTable.style.display = "none";
-    }
-
-    const categoryFil = document.getElementById("categoryFilter");
-    if (categoryFil) {
-      categoryFil.style.display = "none";
-    }
-
-    initCategories();
-    syncUI();
-    syncAdminUI();
-
-    updateThemeButton();
-    // optional: initiale Views
-    updateToggleButton?.();
-    syncAdminUI();
-  }
-});
-
-/* =====================================================
-   ADMIN: INITIALDATEN NEU LADEN
-===================================================== */
-function resetMaterialData() {
-  if (!loggedIn || !isAdmin) return;
-
-  const ok = confirm(
-    "ACHTUNG!\n\nAlle aktuellen Materialdaten werden gelöscht\nund aus den Initialdaten neu geladen.\n\nFortfahren?"
-  );
-
-  if (!ok) return;
-
-  localStorage.removeItem("materialData");
-  location.reload();
-}
-
-function syncAdminUI() {
- const btn = document.getElementById("resetMaterialDataBtn");
-  if (!btn) return;
-
-  /* 🔑 NUR sichtbar wenn Key aktiv */
-  btn.style.display = editEnabled ? "inline-block" : "none"
-
-
-}
-/* =====================================================
-   TAB CONTROLLER (ERWEITERBAR, DOM-SICHER)
-===================================================== */
-window.TabController = (function () {
-  let active = "ke";
-  const sections = {
-    ke: "KeSection",
-    fs: "fsSection",
-    history: "historySection"
+    render();
+    reapplyKEColumns();
   };
 
-  function show(tab) {
-    active = tab;
-    Object.entries(sections).forEach(([key, id]) => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = key === tab ? "" : "none";
-      const keToolbar = document.getElementById("keToolbar");
-      if (keToolbar) {
-        keToolbar.style.display = tab === "ke" ? "" : "none";
-      }      
-    });
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commit();
+    }
+  });
 
-    // 🔑 HIER: gezielt rendern
-    if (tab === "ke") {
-      listVisible = true;
-      render();
-      reapplyKEColumns();
+  input.addEventListener("blur", commit);
+  btn.addEventListener("click", commit);
+}
+
+/* =====================================================
+   KE – HILFSFUNKTION HIGHLIGHT
+===================================================== */
+function highlight(text, q) {
+  if (!q) return text;
+  return text.replace(
+    new RegExp(`(${q})`, "gi"),
+    '<span class="highlight">$1</span>'
+  );
+}
+
+/* =====================================================
+   KE – FILTER LOGIK
+===================================================== */
+function getFilteredData() {
+  let result = [...data];
+
+  const cat = categoryFilter?.value;
+  if (cat) {
+    result = result.filter(r => r.cat === cat);
+  }
+
+  const q = search?.value?.toLowerCase().trim();
+  if (q) {
+    result = result.filter(r =>
+      Object.values(r).some(v =>
+        String(v).toLowerCase().includes(q)
+      )
+    );
+  }
+
+  return result;
+}
+
+/* =====================================================
+   KE – RENDER OVERRIDE MIT FILTER
+===================================================== */
+const _renderOriginal = render;
+render = function () {
+  if (!loggedIn) return;
+
+  tableBody.innerHTML = "";
+
+  const filtered = getFilteredData();
+  let lastCat = null;
+
+  filtered.forEach(row => {
+    const index = data.indexOf(row);
+
+    if (row.cat !== lastCat) {
+      tableBody.innerHTML +=
+        `<tr class="category"><td colspan="9">${row.cat}</td></tr>`;
+      lastCat = row.cat;
     }
 
-    if (tab === "fs") {
-      renderFS();
-      if (typeof reapplyFsColumns === "function") reapplyFsColumns();
-    }
+    tableBody.innerHTML += `
+      <tr class="data-row ${row._isDefault ? "default-row" : "🔒"}">
+                <!-- ➕ LINKS -->
+                <td class="row-action left">
+                  <span class="row-btn add" onclick="addRowAfter(${index})">＋</span>
+                </td>
+                    ${cell(row.material, index, "material")}
+                    ${cell(row.e, index, "e")}
+                    ${cell(row.charge, index, "charge")}
+                    ${cell(row.palette, index, "palette")}
+                    ${cell(row.shelf, index, "shelf")}
+                    ${cell(row.bestand, index, "bestand")}
+                    ${cell(row.bemerkung, index, "bemerkung")}
+                <!-- ➖ RECHTS -->
+                  <td class="row-action right">
+                    ${
+                      !row._isDefault
+                        ? `<span class="row-btn remove" onclick="removeRow(${index})">−</span>`
+                        : ""
+                    }
+                  </td>
 
-    localStorage.setItem("activeTab", tab);
+      </tr>
+    `;
+  });
+};
+
+
+
+/* =====================================================
+   KEYBOARD SHORTCUTS
+===================================================== */
+document.addEventListener("keydown", e => {
+  if (!loggedIn) return;
+
+  /* ESC = Sperren */
+  if (e.key === "Escape" && editEnabled) {
+    lockEditing();
   }
 
-  function getActive() {
-    return active;
+  /* CTRL + F = Fokus Suche */
+  if (e.ctrlKey && e.key.toLowerCase() === "f") {
+    e.preventDefault();
+    search?.focus();
   }
 
-  function init() {
-    const saved = localStorage.getItem("activeTab") || "ke";
-    show(saved);
+  /* CTRL + L = Logout */
+  if (e.ctrlKey && e.key.toLowerCase() === "l") {
+    e.preventDefault();
+    logout();
   }
+});
 
-  return { show, init, getActive };
+/* =====================================================
+   ROBUSTE DOM-HILFEN
+===================================================== */
+function $(id) {
+  return document.getElementById(id);
+}
+
+function $$(sel, root = document) {
+  return [...root.querySelectorAll(sel)];
+}
+
+/* =====================================================
+   INITIAL UI STATE
+===================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  syncUI();
+  syncAdminUI();
+
+  if (search) search.value = "";
+  if (categoryFilter) categoryFilter.value = "";
+});
+
+
+/* =====================================================
+   FEHLERABSICHERUNG – REQUIRED ELEMENTS
+===================================================== */
+(function sanityCheck() {
+  const required = [
+    app,
+    loginBox,
+    userInput,
+    passInput,
+    tableBody
+  ];
+
+  const missing = required.filter(el => !el);
+  if (missing.length) {
+    console.error(
+      "Initialisierung fehlgeschlagen – DOM-Elemente fehlen:",
+      missing
+    );
+  }
 })();
 
+/* =====================================================
+   VISIBILITY HELPERS
+===================================================== */
+function show(el) {
+  if (el) el.style.display = "";
+}
 
+function hide(el) {
+  if (el) el.style.display = "none";
+}
+
+/* =====================================================
+   LOGIN STATE RESTORE
+===================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-  if (window.TabController) TabController.init();
-
-  const search = document.getElementById("search");
-  const categoryFilter = document.getElementById("categoryFilter");
-
-  if (search) {
-    search.addEventListener("input", () => {
-      if (window.TabController?.getActive() === "ke") {
-        render();
-      }
-    });
+  if (loggedIn) {
+    hide(loginBox);
+    show(app);
+  } else {
+    hide(app);
+    show(loginBox);
   }
-
-  if (categoryFilter) {
-    categoryFilter.addEventListener("change", () => {
-      if (window.TabController?.getActive() === "ke") {
-        render();
-      }
-    });
-  }
-  
 });
+
+/* =====================================================
+   STORAGE MIGRATION (FUTURE-SAFE)
+===================================================== */
+(function migrateStorage() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) throw new Error("Invalid data");
+
+    /* Beispiel für zukünftige Migrationen */
+    parsed.forEach(r => {
+      if (!("bemerkung" in r)) r.bemerkung = "";
+    });
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+  } catch (e) {
+    console.warn("Storage Migration übersprungen:", e.message);
+  }
+})();
+
+/* =====================================================
+   DEBUG (OPTIONAL)
+===================================================== */
+window.__APP_DEBUG__ = {
+  get data() {
+    return data;
+  },
+  get fsData() {
+    return window.fsData;
+  },
+  lockEditing,
+  unlockEditing,
+  render,
+  renderFS
+};
+
+/* =====================================================
+   SPALTEN-PERSISTENZ (KE)
+===================================================== */
+const KE_COL_STATE_KEY = "keColumnState";
+
+function saveKEColumnState() {
+  const state = {};
+  document
+    .querySelectorAll(".ke-column-controls input[type=checkbox]")
+    .forEach(cb => {
+      state[cb.dataset.col] = cb.checked;
+    });
+  localStorage.setItem(KE_COL_STATE_KEY, JSON.stringify(state));
+}
+
+function restoreKEColumnState() {
+  const raw = localStorage.getItem(KE_COL_STATE_KEY);
+  if (!raw) return;
+
+  try {
+    const state = JSON.parse(raw);
+    document
+      .querySelectorAll(".ke-column-controls input[type=checkbox]")
+      .forEach(cb => {
+        if (cb.dataset.col in state) {
+          cb.checked = !!state[cb.dataset.col];
+        }
+      });
+    reapplyKEColumns();
+  } catch (e) {
+    console.warn("KE Column State konnte nicht geladen werden");
+  }
+}
+
+/* Speichern bei Änderung */
+document
+  .querySelectorAll(".ke-column-controls input[type=checkbox]")
+  .forEach(cb => cb.addEventListener("change", saveKEColumnState));
+
+/* Wiederherstellen beim Start */
+document.addEventListener("DOMContentLoaded", restoreKEColumnState);
+
+/* =====================================================
+   SPALTEN-PERSISTENZ (FS)
+===================================================== */
+const FS_COL_STATE_KEY = "fsColumnState";
+
+function saveFSColumnState() {
+  const state = {};
+  document
+    .querySelectorAll(".fs-column-controls input[type=checkbox]")
+    .forEach(cb => {
+      state[cb.dataset.col] = cb.checked;
+    });
+  localStorage.setItem(FS_COL_STATE_KEY, JSON.stringify(state));
+}
+
+function restoreFSColumnState() {
+  const raw = localStorage.getItem(FS_COL_STATE_KEY);
+  if (!raw) return;
+
+  try {
+    const state = JSON.parse(raw);
+    document
+      .querySelectorAll(".fs-column-controls input[type=checkbox]")
+      .forEach(cb => {
+        if (cb.dataset.col in state) {
+          cb.checked = !!state[cb.dataset.col];
+        }
+      });
+    if (typeof reapplyFsColumns === "function") {
+      reapplyFsColumns();
+    }
+  } catch (e) {
+    console.warn("FS Column State konnte nicht geladen werden");
+  }
+}
+
+document
+  .querySelectorAll(".fs-column-controls input[type=checkbox]")
+  .forEach(cb => cb.addEventListener("change", saveFSColumnState));
+
+document.addEventListener("DOMContentLoaded", restoreFSColumnState);
+
+/* =====================================================
+   UNLOAD-SICHERUNG
+===================================================== */
+window.addEventListener("beforeunload", () => {
+  try {
+    save();
+    saveKEColumnState();
+    saveFSColumnState();
+  } catch (_) {
+    /* still */
+  }
+});
+
+/* =====================================================
+   RESIZE-STABILISIERUNG
+===================================================== */
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (TabController?.show) {
+      const active =
+        localStorage.getItem("activeTab") || "ke";
+      TabController.show(active);
+    }
+  }, 200);
+});
+/* =====================================================
+   EOF – daten.js vollständig
+===================================================== */
