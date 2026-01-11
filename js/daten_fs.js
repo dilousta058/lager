@@ -257,6 +257,7 @@ function renderFS() {
       )
     );
   }
+  setTabCount("fs", fsFiltered.length);
   /* ===== ENDE FILTER ===== */
 
   fsFiltered.forEach((r, i) => {

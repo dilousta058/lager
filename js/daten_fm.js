@@ -502,3 +502,15 @@ function saveFMData() {
   localStorage.setItem(STORAGE_KEY_FM, JSON.stringify(fmData));
 }
 
+function setTabCount(tab, count) {
+  const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+  if (!btn) return;
+
+  const base = btn.textContent.replace(/\s*\(\d+\)$/, "");
+
+  if (count > 0 && globalSearchTerm) {
+    btn.textContent = `${base} (${count})`;
+  } else {
+    btn.textContent = base;
+  }
+}

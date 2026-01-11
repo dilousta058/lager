@@ -88,15 +88,6 @@
         <span id="status"></span>
 
         <hr>
-        <center>
-          <!-- Such- & Steuerleiste -->
-            <div id="keToolbar">
-              <input id="search" placeholder="Suche (Material, E-Nummer, Regal)">
-              <select id="categoryFilter">
-                <option value="">Alle Kategorien</option>
-              </select>
-            </div>
-        </center>
 
         <div class="tab-bar">
           <button class="tab-btn" data-tab="ke">Rohstoff Liste</button>
@@ -104,12 +95,14 @@
           <button class="tab-btn" data-tab="fm">FM-Schleifbänder</button>
           <button class="tab-btn" data-tab="history">Historie</button>
         </div>
-
-
+        <hr>
+        
+        <input id="search" placeholder="Suche (Material, E-Nummer, Regal)">
     <div class="content">
             <!-- =========================
                 KE SECTION
             ========================= -->
+
             <div id="keSection" class="tab-section active">
               <div class="ke-column-controls">
                 <label class="locked"><input type="checkbox" checked disabled> Material</label>
@@ -120,7 +113,14 @@
                 <label><input type="checkbox" data-col="bestand" checked> Bestand</label>
                 <label><input type="checkbox" data-col="bemerkung" checked> Bemerkung</label>
               </div>
-
+        <center>
+          <!-- Such- & Steuerleiste -->
+            <div id="keToolbar">
+              <select id="categoryFilter">
+                <option value="">Alle Kategorien</option>
+              </select>
+            </div>
+        </center>
               <div class="table-fullwidth">
                 <div class="table-scroll">
                   <table class="lager-table KE-table">

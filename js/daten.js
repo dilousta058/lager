@@ -494,9 +494,6 @@ safeOn(search, "input", () => {
   }
 });
 
-
-
-
 /* =====================================================
    KE – SPALTEN CHECKBOXEN
 ===================================================== */
@@ -672,6 +669,7 @@ render = function () {
   tableBody.innerHTML = "";
 
   const filtered = getFilteredData();
+  setTabCount("ke", filtered.length);
   let lastCat = null;
 
   filtered.forEach(row => {
@@ -968,6 +966,8 @@ function renderFM() {
       )
     );
   }
+
+  setTabCount("fm", fmFiltered.length);
   /* ===== ENDE FILTER ===== */
 
   fmFiltered.forEach(row => {
