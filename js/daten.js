@@ -21,10 +21,14 @@ function safeOn(el, evt, fn) {
 }
 
 /* =====================================================
-   KONFIGURATION
+   KONFIGURATION STORAGE_KEYS
 ===================================================== */
 const STORAGE_KEY = "materialData";
 const HISTORY_KEY = "materialHistory";
+
+
+
+
 const LOGIN_USER = "DiloUsta58";
 const LOGIN_PASS = "64579";
 const EDIT_KEY = "64579";
@@ -109,10 +113,13 @@ function login(e) {
   if (user === LOGIN_USER && pass === LOGIN_PASS) {
     loggedIn = true;
     isAdmin = true;
+    editEnabled = false;
+    localStorage.setItem("editEnabled", "false");
     sessionStorage.setItem("loggedIn", "true");
 
     loginBox.style.display = "none";
     app.style.display = "block";
+    document.getElementById("historySection").style.display = "block";
 
     initCategories();
     syncUI();
@@ -130,6 +137,7 @@ function logout() {
 
   loggedIn = false;
   editEnabled = false;
+ document.getElementById("historySection").style.display = "none";
 
   // 🔍 Suche & Highlight zurücksetzen
   globalSearchTerm = "";
@@ -155,6 +163,15 @@ function logout() {
   loginBox.style.display = "block";
 }
 
+/* Button schaltet Edit-Modus*/
+function toggleEdit() {
+  editEnabled = !editEnabled;
+  localStorage.setItem("editEnabled", editEnabled ? "true" : "false");
+
+  // aktiven Tab neu rendern
+  const tab = TabController.getActive();
+  if (tab) TabController.show(tab);
+}
 
 /* =====================================================
    TAB CONTROLLER (BEREINIGT)
@@ -185,8 +202,10 @@ window.TabController = (() => {
     loadFMData();
     renderFM();
     }
-  },
-
+  },/*
+    inv: {
+    section: "inventarSection",
+  },*/
     history: {
       section: "historySection",
       render: () => {
@@ -222,7 +241,6 @@ window.TabController = (() => {
     const saved = localStorage.getItem("activeTab") || "ke";
     show(saved);
   }
-
   return { init, show, getActive: () => active};   // 🔑 NEU 
 })();
 
@@ -281,6 +299,7 @@ function renderHistory() {
   const body = document.getElementById("historyBody");
   body.innerHTML = "";
 
+
   const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
   history.slice().reverse().forEach(h => {
     body.innerHTML += `
@@ -307,6 +326,7 @@ function syncUI() {
 function syncAdminUI() {
   const btn = document.getElementById("resetMaterialDataBtn");
   if (btn) btn.style.display = editEnabled ? "inline-block" : "none";
+
 }
 
 /* =====================================================
@@ -316,6 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (loggedIn) {
     loginBox.style.display = "none";
     app.style.display = "block";
+    document.getElementById("historySection").style.display = "block";
 
     initCategories();      // ✅ FEHLTE
     syncUI();
@@ -465,8 +486,17 @@ function resetMaterialData() {
   );
   if (!ok) return;
 
-  localStorage.removeItem(STORAGE_KEY);
-  location.reload();
+    if (!confirm("Alle gespeicherten Daten wirklich löschen?")) return;
+      localStorage.removeItem(HISTORY_KEY);
+      localStorage.removeItem(FS_KEY);
+      localStorage.removeItem(STORAGE_KEY);
+    
+
+      localStorage.clear();
+      sessionStorage.clear();
+      location.reload();
+      // HARD RELOAD ohne App-Reinit
+      location.href = location.pathname;
 }
 
 /* =====================================================
@@ -996,88 +1026,7 @@ window.addEventListener("resize", () => {
   }, 200);
 });
 
-function renderFM() {
-  if (!loggedIn) return;
 
-  const tbody = document.getElementById("fmTableBody");
-  tbody.innerHTML = "";
-
-  /* ===== FILTER ===== */
-  let fmFiltered = fmData;
-
-  if (globalSearchTerm) {
-    fmFiltered = fmFiltered.filter(row =>
-      Object.values(row).some(v =>
-        String(v).toLowerCase().includes(globalSearchTerm)
-      )
-    );
-  }
-
-  setTabCount("fm", fmFiltered.length);
-  /* ===== ENDE FILTER ===== */
-
-  fmFiltered.forEach(row => {
-    tbody.innerHTML += `
-      <tr>
-        <td data-col="pos1">
-          ${highlightText(row.pos1 ?? "", globalSearchTerm)}
-        </td>
-        <td data-col="artikel1">
-          ${highlightText(row.artikel1 ?? "", globalSearchTerm)}
-        </td>
-        <td data-col="artikel2">
-          ${highlightText(row.artikel2 ?? "", globalSearchTerm)}
-        </td>
-        <td data-col="artikel">
-          ${highlightText(row.artikel ?? "", globalSearchTerm)}
-        </td>
-        <td data-col="koernung">
-          ${highlightText(row.koernung ?? "", globalSearchTerm)}
-        </td>
-        <td data-col="abmessung">
-          ${highlightText(row.abmessung ?? "", globalSearchTerm)}
-        </td>
-        <td data-col="verpackung">
-          ${highlightText(row.verpackung ?? "", globalSearchTerm)}
-        </td>
-        <td data-col="lieferung_pr">
-          ${highlightText(row.lieferung_pr ?? "", globalSearchTerm)}
-        </td>
-        <td data-col="bestand">
-          ${highlightText(row.bestand ?? "", globalSearchTerm)}
-        </td>
-        <td data-col="bemerkung">
-          ${highlightText(row.bemerkung ?? "", globalSearchTerm)}
-        </td>
-      </tr>
-    `;
-  });
-}
-
-
-document
-  .querySelectorAll('#fmSection input[type="checkbox"][data-col]')
-  .forEach(cb => {
-    cb.addEventListener("change", () => {
-      const col = cb.dataset.col;
-      const visible = cb.checked;
-
-      document
-        .querySelectorAll(`#fmSection [data-col="${col}"]`)
-        .forEach(el => {
-          el.style.display = visible ? "" : "none";
-        });
-    });
-  });
-
-  function highlightText(text, term) {
-  if (!term) return text;
-
-  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const regex = new RegExp(`(${escaped})`, "gi");
-
-  return String(text).replace(regex, '<mark class="search-hit">$1</mark>');
-}
 
 /* =====================================================
    EOF – daten.js vollständig

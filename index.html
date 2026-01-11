@@ -3,59 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Materialliste – Rohstoff</title>
-
-
-<style>
-  :root {
-    --surface: #ffffff;
-    --accent: #0067c0;
-  }
-
-  /* TAB BAR */
-  .tab-bar {
-    display: flex;
-    gap: 6px;
-    padding: 6px;
-    background: #eaeaea;
-    border-radius: 10px;
-    width: fit-content;
-    margin-bottom: 12px;
-  }
-
-  .tab-btn {
-    border: none;
-    background: transparent;
-    padding: 8px 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    color: #333;
-  }
-
-  .tab-btn:hover {
-    background: rgba(0,0,0,0.05);
-  }
-
-  .tab-btn.active {
-    background: var(--surface);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-    color: var(--accent);
-  }
-
-
-  .tab-section {
-    display: none;
-    animation: fadeIn 0.2s ease-in-out;
-  }
-
-  .tab-section.active {
-    display: block;
-  }
-
-
-</style>
-
-  <link rel="stylesheet" href="css/style.css">
+   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -78,13 +26,13 @@
 <div id="app" style="display:none">
   <h2>Materialliste</h2>
         <button  id="resetMaterialDataBtn"  class="admin-btn danger"  onclick="resetMaterialData()" style="display:none">  Initialdaten neu laden</button>
-        <button id="themeToggleBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
+        <button id="themeToggleBtn" class="btn" onclick="toggleTheme()">🌙 Dark Mode</button>
         <!-- Logout sperrt die komplette Liste wieder -->
-        <button onclick="logout()">Logout</button>
+        <button class="btn" onclick="logout()">Logout</button>
         <!-- Key-Freischaltung -->
-        <input id="keyInput" type="password" placeholder="Key eingeben">
-        <button id="unlockBtn" onclick="unlockEditing()">🔓 Freischalten</button>
-        <button onclick="lockEditing()">🔒 Sperren</button>
+        <input class="inputs" id="keyInput" type="password" placeholder="Key eingeben">
+        <button id="unlockBtn" class="btn" onclick="unlockEditing()">🔓 Freischalten</button>
+        <button class="btn" onclick="lockEditing()">🔒 Sperren</button>
         <span id="status"></span>
 
         <hr>
@@ -93,11 +41,12 @@
           <button class="tab-btn" data-tab="ke">Rohstoff Liste</button>
           <button class="tab-btn" data-tab="fs">FS-Tiegel Liste</button>
           <button class="tab-btn" data-tab="fm">FM-Schleifbänder</button>
-          <button class="tab-btn" data-tab="history">Historie</button>
+          <!--<button class="tab-btn" data-tab="inv">Inventar - Liste</button>
+          <button class="tab-btn" data-tab="history">Historie</button>-->
         </div>
         <hr>
         
-        <input id="search" placeholder="Suche (Material, E-Nummer, Regal)">
+        <input class="sSearch" id="search" placeholder="Suche (Material, E-Nummer, Regal)">
     <div class="content">
             <!-- =========================
                 KE SECTION
@@ -116,7 +65,7 @@
         <center>
           <!-- Such- & Steuerleiste -->
             <div id="keToolbar">
-              <select id="categoryFilter">
+              <select id="categoryFilter" class="filter">
                 <option value="">Alle Kategorien</option>
               </select>
             </div>
@@ -141,6 +90,28 @@
                   </table>
                 </div>
               </div>
+              <!-- =========================
+                  HISTORY SECTION
+              ========================= -->
+              <div id="historySection" class="hidden" style="margin-top:10px;">
+                <h3 class="section-title">Änderungshistorie</h3>
+                <div class="history-controls">
+                  <button onclick="toggleHistory()">Historie anzeigen / ausblenden</button>
+                  <button onclick="clearHistory()">Historie löschen</button>
+                </div>
+
+                <table id="historyTable" class="lager-table history-table" style=margin-top:10px;">
+                  <thead>
+                    <tr>
+                      <th>Zeit</th>
+                      <th>Feld</th>
+                      <th>Alt</th>
+                      <th>Neu</th>
+                    </tr>
+                  </thead>
+                  <tbody id="historyBody"></tbody>
+                </table>
+              </div>              
             </div>
 
             <!-- =========================
@@ -185,11 +156,11 @@
                 FM SECTION
             ========================= -->
               <section id="fmSection" class="tab-section">
-
+                                              <button id="ResetFMToggleBtn" onclick="resetFM()">Tabelle zurücksetzen</button>
               <!-- Spaltenauswahl -->
               <div class="fm-column-toggle">
                 <label><label class="locked"><input type="checkbox" checked disabled> Abmessung</label>
-                <label><input type="checkbox" data-col="pos1" checked> Pos. #1</label>
+                <label><input type="checkbox" data-col="pos1" checked> Pos. Nr.</label>
                 <label><input type="checkbox" data-col="artikel1" checked> Artikel-Nr. #1</label>
                 <label><input type="checkbox" data-col="artikel2" checked> Artikel-Nr. #2</label>
                 <label><input type="checkbox" data-col="artikel" checked> Artikel</label>
@@ -203,7 +174,7 @@
               <!-- Tabelle -->
               <div class="table-fullwidth">
                 <div class="table-scroll">
-                  <table id="fmTable">
+                  <table class="fmTable">
                     <thead>
                       <tr>
                         <th data-col="pos1">Pos. #1</th>
@@ -223,30 +194,6 @@
                 </div>
               </div>
             </section>
-
-            <!-- =========================
-                HISTORY SECTION
-            ========================= -->
-            <div id="historySection" style="display:none; margin-top:20px;">
-              <h3 class="section-title">Änderungshistorie</h3>
-              <div class="history-controls">
-                <button onclick="toggleHistory()">Historie anzeigen / ausblenden</button>
-                <button onclick="clearHistory()">Historie löschen</button>
-              </div>
-
-              <table id="historyTable" class="lager-table history-table" style="display:none; margin-top:10px;">
-                <thead>
-                  <tr>
-                    <th>Zeit</th>
-                    <th>Feld</th>
-                    <th>Alt</th>
-                    <th>Neu</th>
-                  </tr>
-                </thead>
-                <tbody id="historyBody"></tbody>
-              </table>
-            </div>
-      </div>
 </div>
 
 

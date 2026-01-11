@@ -3,6 +3,7 @@
 ========================= */
 const FS_KEY = "fs_lager_data_v1";
 
+
 /* =========================
    INITIALDATEN – FS (NICHT DIREKT ÄNDERN)
 ========================= */

@@ -1,3 +1,21 @@
+/* =========================
+   STORAGE KEY – FM
+========================= */
+const FM_STORAGE_KEY = "fmData";
+
+/* =========================
+   Editier Bereich – FS
+========================= */
+const FM_EDITABLE_FIELDS = [
+  "lieferung_pr",
+  "bestand",
+  "bemerkung"
+];
+/* =====================================================
+   STATUS
+===================================================== */
+
+
 const DEFAULT_FM_DATA = [
   {
     pos1: 1,
@@ -454,18 +472,23 @@ const DEFAULT_FM_DATA = [
   }
 ];
 
-/* Daten – Storage & Default */
-const STORAGE_KEY_FM = "fm_data";
-
-let fmData = [];
-
+let fmData = loadFMData();
+/* Daten Laden */
 function loadFMData() {
-  const stored = localStorage.getItem(STORAGE_KEY_FM);
-  fmData = stored ? JSON.parse(stored) : structuredClone(DEFAULT_FM_DATA);
+  const stored = localStorage.getItem(FM_STORAGE_KEY);
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return structuredClone(DEFAULT_FM_DATA);
+    }
+  }
+  return structuredClone(DEFAULT_FM_DATA);
 }
 
+/* Daten Speichern */
 function saveFMData() {
-  localStorage.setItem(STORAGE_KEY_FM, JSON.stringify(fmData));
+  localStorage.setItem(FM_STORAGE_KEY, JSON.stringify(fmData));
 }
 
 function setTabCount(tab, count) {
@@ -479,4 +502,142 @@ function setTabCount(tab, count) {
   } else {
     btn.textContent = base;
   }
+}
+
+/* Edit funktion */
+function fmCell(value, rowIndex, field) {
+  const canEdit = FM_EDITABLE_FIELDS.includes(field);
+
+  return `
+    <td data-col="${field}" class="${canEdit ? "" : "protected"}">
+      <div class="edit-wrapper">
+        <span>${value ?? ""}</span>
+        ${
+          canEdit
+            ? `<span class="edit-icon"
+                   onclick="editFM(this, ${rowIndex}, '${field}')">✏️</span>`
+            : ""
+        }
+      </div>
+    </td>
+  `;
+}
+
+function editFM(icon, rowIndex, field) {
+  /* 
+    ➡️ Die Funktion beendet sich sofort
+    ➡️ Kein Input
+    ➡️ Kein Fehler
+    ➡️ „Es passiert nichts“
+    */
+  
+    const canEdit = editEnabled && FM_EDITABLE_FIELDS.includes(field);
+  if (!editEnabled) return;
+
+
+
+  const td = icon.closest("td");
+  const span = td.querySelector("span");
+
+  if (!span) return;
+
+  const oldValue = span.textContent;
+
+  // Input erzeugen
+  const input = document.createElement("input");
+  input.type = "text";
+  input.value = oldValue;
+  input.className = "cell-input";
+
+  // Span ersetzen
+  span.replaceWith(input);
+  input.focus();
+
+  function save() {
+    const newValue = input.value.trim();
+
+    // Daten aktualisieren
+    fmData[rowIndex][field] = newValue;
+    saveFMData();
+    // Re-Render
+    renderFM();
+  }
+
+  input.addEventListener("blur", save);
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter") input.blur();
+    if (e.key === "Escape") renderFM();
+  });
+}
+
+
+function renderFM() {
+  if (!loggedIn) return;
+
+  const tbody = document.getElementById("fmTableBody");
+  tbody.innerHTML = "";
+
+  /* ===== FILTER ===== */
+  let fmFiltered = fmData;
+
+  if (globalSearchTerm) {
+    fmFiltered = fmFiltered.filter(row =>
+      Object.values(row).some(v =>
+        String(v).toLowerCase().includes(globalSearchTerm)
+      )
+    );
+  }
+
+  setTabCount("fm", fmFiltered.length);
+  /* ===== ENDE FILTER ===== */
+
+  fmFiltered.forEach((row, i) => {
+    tbody.innerHTML += `
+      <tr>
+        <td data-col="pos1">${highlightText(row.pos1 ?? "", globalSearchTerm)}</td>
+        <td data-col="artikel1">${highlightText(row.artikel1 ?? "", globalSearchTerm)}</td>
+        <td data-col="artikel2">${highlightText(row.artikel2 ?? "", globalSearchTerm)}</td>
+        <td data-col="artikel">${highlightText(row.artikel ?? "", globalSearchTerm)}</td>
+        <td data-col="koernung">${highlightText(row.koernung ?? "", globalSearchTerm)}</td>
+        <td data-col="abmessung">${highlightText(row.abmessung ?? "", globalSearchTerm)}</td>
+        <td data-col="verpackung">${highlightText(row.verpackung ?? "", globalSearchTerm)}</td>
+        ${fmCell(row.lieferung_pr, i, "lieferung_pr")}
+        ${fmCell(row.bestand, i, "bestand")}
+        ${fmCell(row.bemerkung, i, "bemerkung")}
+      </tr>
+    `;
+  });
+}
+
+document
+  .querySelectorAll('#fmSection input[type="checkbox"][data-col]')
+  .forEach(cb => {
+    cb.addEventListener("change", () => {
+      const col = cb.dataset.col;
+      const visible = cb.checked;
+
+      document
+        .querySelectorAll(`#fmSection [data-col="${col}"]`)
+        .forEach(el => {
+          el.style.display = visible ? "" : "none";
+        });
+    });
+  });
+
+  function highlightText(text, term) {
+  if (!term) return text;
+
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(${escaped})`, "gi");
+
+  return String(text).replace(regex, '<mark class="search-hit">$1</mark>');
+}
+
+function resetFM() {
+  if (!confirm("FM-Daten wirklich zurücksetzen?")) return;
+
+  localStorage.removeItem("fmData");
+
+  fmData = structuredClone(DEFAULT_FM_DATA);
+  renderFM();
 }
