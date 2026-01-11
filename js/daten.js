@@ -1000,9 +1000,6 @@ function renderFM() {
         <td data-col="bestand">
           ${highlightText(row.bestand ?? "", globalSearchTerm)}
         </td>
-        <td data-col="pos2">
-          ${highlightText(row.pos2 ?? "", globalSearchTerm)}
-        </td>
         <td data-col="bemerkung">
           ${highlightText(row.bemerkung ?? "", globalSearchTerm)}
         </td>
