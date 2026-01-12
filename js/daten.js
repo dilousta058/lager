@@ -487,14 +487,21 @@ function resetMaterialData() {
   if (!ok) return;
 
     if (!confirm("Alle gespeicherten Daten wirklich löschen?")) return;
-      localStorage.removeItem(HISTORY_KEY);
-      localStorage.removeItem(FS_KEY);
-      localStorage.removeItem(STORAGE_KEY);
-    
+        localStorage.clear();
+        sessionStorage.clear();
 
-      localStorage.clear();
-      sessionStorage.clear();
-      location.reload();
+        // In-Memory Reset
+        fmData = structuredClone(DEFAULT_FM_DATA);
+        fsData = structuredClone(DEFAULT_FS_DATA);
+        data   = structuredClone(defaultData);
+
+        // UI Reset
+        globalSearchTerm = "";
+        if (search) search.value = "";
+
+        renderFM();
+        renderFS();
+        render();
       // HARD RELOAD ohne App-Reinit
       location.href = location.pathname;
 }

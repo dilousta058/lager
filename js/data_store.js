@@ -29,7 +29,7 @@ const defaultData = [
    MATERIAL KERNFERTIGUNG
 ======================= */
 { cat: "Material Kernfertigung", material: "Remet FS 120 Mesh LHT", e: "E00010380", shelf: "", bestand: "",_isDefault: true, _isClone: false },
-{ cat: "Material Kernfertigung", material: "Amosil FW4", e: "E00010376", shelf: "", bestand: "",_isDefault: true, _isClone: false },
+{ cat: "Material Kernfertigung", material: "Amosil FW4", e: "E00010376_1", shelf: "", bestand: "",_isDefault: true, _isClone: false },
 { cat: "Material Kernfertigung", material: "Amosil 550", e: "E00010377", shelf: "", bestand: "",_isDefault: true, _isClone: false },
 { cat: "Material Kernfertigung", material: "Sikron SF6000", e: "E00001155", shelf: "", bestand: "",_isDefault: true, _isClone: false },
 { cat: "Material Kernfertigung", material: "Zirkon", e: "E00004495", shelf: "", bestand: "",_isDefault: true, _isClone: false },
@@ -48,9 +48,13 @@ const defaultData = [
 /* =======================
    MATERIAL KERNBEARBEITUNG
 ======================= */
-
-{ cat: "Material Kernbearbeitung", material: "SGT5 Blade 3889", e: "32838890", shelf: "CIC", bestand: "",_isDefault: true, _isClone: false },
+{ cat: "Material Kernbearbeitung", material: "SGT5 Blade 3889", e: "32838890", shelf: "", bestand: "",_isDefault: true, _isClone: false },
 { cat: "Material Kernbearbeitung", material: "3876-2", e: "E32899602", shelf: "", bestand: "",_isDefault: true, _isClone: false },
+{ cat: "Material Kernbearbeitung", material: "3889-AK", e: "E32838894", shelf: "", bestand: "",_isDefault: true, _isClone: false },
+{ cat: "Material Kernbearbeitung", material: "3889-EK", e: "E32838892", shelf: "", bestand: "",_isDefault: true, _isClone: false },
+{ cat: "Material Kernbearbeitung", material: "3889-Mitte", e: "E32838893", shelf: "", bestand: "",_isDefault: true, _isClone: false },
+{ cat: "Material Kernbearbeitung", material: "3896", e: "E32838891", shelf: "", bestand: "",_isDefault: true, _isClone: false },
+
 /* ===========================
    MATERIAL SCHMELZE / BAFFLE
 ============================ */
