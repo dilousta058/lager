@@ -343,7 +343,8 @@ label {
 }
 
 #fmSection table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   width: 100%;
   font-size: 13px;
 }
@@ -371,6 +372,9 @@ label {
   background-color: #5b9bd5;
   color: #ffffff;
   font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 10;  
 }
 
 [data-theme="dark"] #fmSection thead th {
@@ -562,8 +566,164 @@ mark.search-hit {
     color: #ffffff;
 }
 
+/* =========================
+   INVENTUR
+========================= */
+.inventur-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.inventory-total {
+  background: #e5e7eb;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .inventory-total {
+  background: #1e293b;
+}
+
+@media print {
+
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+
+  body {
+    background: white;
+    color: black;
+    font-size: 11px;
+  }
+
+    /* Alles aus */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Inventur sichtbar */
+#inventarSection,
+#inventarSection * {
+  visibility: visible;
+}
+
+#inventarSection {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+/*Überschrift + Stichtag formatieren*/
+#inventarSection h3 {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .inventur-header {
+    margin-bottom: 10px;
+  }
+
+  .inventur-header button {
+    display: none;
+  }
+/* Tabelle druckoptimiert*/
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 1px solid #000;
+    padding: 4px 6px;
+  }
+
+  th {
+    background: #f0f0f0;
+    font-weight: 700;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+/* Spaltenbreiten (sehr empfohlen) */
+  .inv-table th:nth-child(1),
+  .inv-table td:nth-child(1) {
+    width: 10%;
+  }
+
+  .inv-table th:nth-child(2),
+  .inv-table td:nth-child(2) {
+    width: 35%;
+  }
+
+  .inv-table th:nth-child(3),
+  .inv-table td:nth-child(3) {
+    width: 15%;
+  }
+
+  .inv-table th:nth-child(4),
+  .inv-table td:nth-child(4),
+  .inv-table th:nth-child(5),
+  .inv-table td:nth-child(5) {
+    width: 15%;
+  }
+
+  .inv-table th:nth-child(6),
+  .inv-table td:nth-child(6) {
+    width: 10%;
+    text-align: right;
+  }
+/*Summenzeilen hervorheben*/
+  .inventory-total {
+    font-weight: 700;
+    background: #ddd;
+  }
+}
+.inventory-sum {
+  font-weight: 700;
+  background: #f3f4f6;
+}
 
 
+/* ==============================
+   Tabellenkopf beim Scrollen fix
+============================== */
+
+.table-scroll {
+  position: relative;
+  overflow-y: auto;
+  max-height: calc(100vh - 260px); /* bewährt */
+}
+
+
+/* ==============================
+   Tabellenkopf beim Scrollen fix
+============================== */
+
+.table-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--bg-card);
+}
+
+/* Dark Mode */
+[data-theme="dark"] .table-scroll thead th {
+  background-color: #1e293b;
+}
+
+/* Erste Spalte fixieren („Quelle“)
+.table-scroll th:first-child,
+.table-scroll td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 11;
+  background: inherit;
+}
+*/
 
 /* =====================================================
    MOBILE / TABLET OPTIMIZATION

@@ -163,6 +163,36 @@ function logout() {
   loginBox.style.display = "block";
 }
 
+
+/*Die Scroll-Funktion */
+function scrollToFirstHighlight() {
+  if (!globalSearchTerm) return;
+
+  const activeSection = document.querySelector(".tab-section.active");
+  if (!activeSection) return;
+
+  const scrollContainer = activeSection.querySelector(".table-scroll");
+  if (!scrollContainer) return;
+
+  const firstHit = activeSection.querySelector(
+    "tr:not(.inventory-sum) .search-hit"
+  );
+  if (!firstHit) return;
+
+  const containerRect = scrollContainer.getBoundingClientRect();
+  const hitRect = firstHit.getBoundingClientRect();
+
+  scrollContainer.scrollTo({
+    top:
+      hitRect.top -
+      containerRect.top +
+      scrollContainer.scrollTop -
+      20,
+    behavior: "smooth"
+  });
+}
+
+
 /* Button schaltet Edit-Modus*/
 function toggleEdit() {
   editEnabled = !editEnabled;
@@ -202,10 +232,13 @@ window.TabController = (() => {
     loadFMData();
     renderFM();
     }
-  },/*
+  },
     inv: {
     section: "inventarSection",
-  },*/
+    render: () => {
+      renderInventur();
+    }
+  },
     history: {
       section: "historySection",
       render: () => {
@@ -275,6 +308,278 @@ function render() {
     `;
   });
 }
+
+/* =====================================================
+   INVENTUR-LIST LOAD
+===================================================== */
+function collectInventurData() {
+  const rows = [];
+
+  /* =====================
+     KE – AUS LOCALSTORAGE
+  ===================== */
+  data.forEach(r => {
+    rows.push({
+      source: "KE",
+      beschreibung: r.material || "",
+      material: r.material || "",
+      eNummer: r.e || "",
+      charge: r.charge || "",
+      palette: r.palette || "",
+      bestand: r.bestand || ""
+    });
+  });
+
+  /* =====================
+     FS – STORAGE
+  ===================== */
+  fsData.forEach(r => {
+    rows.push({
+      source: "FS",
+      beschreibung: r.bezeichnung || r.kurz || "",
+      material: r.material || "",
+      eNummer: r.eNummer || "",
+      charge: "",
+      palette: "",
+      bestand: r.bestand || ""
+    });
+  });
+
+  /* =====================
+     FM – STORAGE
+  ===================== */
+  fmData.forEach(r => {
+    rows.push({
+      source: "FM",
+      beschreibung: `${r.artikel} ${r.abmessung}`,
+      material: r.artikel || "",
+      eNummer: r.artikel1 || "",
+      charge: "",
+      palette: "",
+      bestand: r.bestand || ""
+    });
+  });
+
+  /* =====================
+     SPÄTER: datenX_inv.js
+  ===================== */
+  if (window.INV_EXTRA_DATA) {
+    window.INV_EXTRA_DATA.forEach(r => rows.push(r));
+  }
+
+  return rows;
+}
+
+/* =====================================================
+   INVENTUR – GRUPPIERUNG NACH E-NUMMER
+===================================================== */
+function groupInventurByENummer(rows) {
+  const map = new Map();
+
+  rows.forEach(r => {
+    const key = r.eNummer || "OHNE_E";
+
+    if (!map.has(key)) {
+      map.set(key, {
+        source: new Set([r.source]),
+        beschreibung: r.beschreibung,
+        eNummer: r.eNummer,
+        charge: r.charge,
+        palette: r.palette,
+        bestand: r.bestand
+      });
+    } else {
+      const g = map.get(key);
+      g.bestand += r.bestand;
+      g.source.add(r.source);
+    }
+  });
+
+  return Array.from(map.values()).map(r => ({
+    ...r,
+    source: Array.from(r.source).join(", ")
+  }));
+}
+
+/* =====================================================
+   INVENTUR – SUMMEN JE QUELLE
+===================================================== */
+function calculateInventurTotals(rows) {
+  const totals = {};
+
+  rows.forEach(r => {
+    const val = Number(r.bestand) || 0;
+    if (!totals[r.source]) totals[r.source] = 0;
+    totals[r.source] += val;
+  });
+
+  return totals;
+}
+
+/* =====================================================
+   Inventur-Stichtag / speichern & laden
+===================================================== */
+const INVENTUR_DATE_KEY = "inventur_stichtag";
+
+function saveInventurDate() {
+  const input = document.getElementById("inventurDate");
+  if (!input.value) return;
+  localStorage.setItem(INVENTUR_DATE_KEY, input.value);
+}
+
+function loadInventurDate() {
+  const val = localStorage.getItem(INVENTUR_DATE_KEY);
+  if (!val) return;
+
+  const input = document.getElementById("inventurDate");
+  if (input) input.value = val;
+}
+
+
+
+function renderInventur() {
+  const body = document.getElementById("invTableBody");
+  if (!body) return;
+
+  body.innerHTML = "";
+
+  /* =========================
+     KE – DETAIL + PRODUKT-GESAMT
+  ========================= */
+  const keRows = buildKEInventurRows();
+
+
+  /* =========================
+     FS – KEINE SUMMEN
+  ========================= */
+  const fsRows = fsData.map(r => ({
+    source: "FS",
+    beschreibung: r.bezeichnung || r.kurz || "",
+    eNummer: r.eNummer || "",
+    charge: "",
+    palette: "",
+    bestand: r.bestand || "",
+    gesamt: ""
+  }));
+
+  /* =========================
+     FM – KEINE SUMMEN
+  ========================= */
+  const fmRows = fmData.map(r => ({
+    source: "FM",
+    beschreibung: `${r.artikel} ${r.abmessung}`,
+    eNummer: r.artikel1 || "",
+    charge: "",
+    palette: "",
+    bestand: r.bestand || "",
+    gesamt: ""
+  }));
+
+  /* =========================
+     GESAMTE INVENTUR (OHNE GLOBALSUMMEN)
+  ========================= */
+ const rows = [...keRows, ...fsRows, ...fmRows];
+
+  setTabCount("inv", rows.length);
+
+  /* =========================
+     RENDER
+  ========================= */
+  rows.forEach(r => {
+    body.innerHTML += `
+      <tr class="${r.gesamt ? 'inventory-sum' : ''}">
+        <td>${r.source}</td>
+        <td>${highlightText(r.beschreibung, globalSearchTerm)}</td>
+        <td>${highlightText(r.eNummer, globalSearchTerm)}</td>
+        <td>${highlightText(r.charge, globalSearchTerm)}</td>
+        <td>${highlightText(r.palette, globalSearchTerm)}</td>
+        <td>${r.bestand}</td>
+        <td>${r.gesamt}</td>
+      </tr>
+    `;
+  });
+}
+
+
+/*Neue KE-Inventur-Aufbereitung (ersetzt alte Gruppierung)*/
+
+function buildKEInventurRows() {
+  const map = new Map();
+
+  data.forEach(r => {
+    const material = (r.material || "").trim();
+    if (!material) return;
+
+    const eNummer = (r.e || "").trim();
+    const charge = (r.charge || "").trim();
+    const palette = (r.palette || "").trim();
+    const bestand = Number(r.bestand);
+
+    const hasDetail =
+      eNummer || charge || palette || (!isNaN(bestand) && bestand > 0);
+
+    if (!map.has(material)) {
+      map.set(material, {
+        rows: [],
+        total: 0
+      });
+    }
+
+    if (hasDetail) {
+      map.get(material).rows.push({
+        source: "KE",
+        beschreibung: material,
+        eNummer,
+        charge,
+        palette,
+        bestand: !isNaN(bestand) ? bestand : "",
+        gesamt: ""
+      });
+    }
+
+    if (!isNaN(bestand) && bestand > 0) {
+      map.get(material).total += bestand;
+    }
+  });
+
+  const result = [];
+
+  map.forEach((entry, material) => {
+    // Detailzeilen
+    entry.rows.forEach(r => result.push(r));
+
+    // GENAU EINE Summenzeile pro Material
+    result.push({
+      source: "KE",
+      beschreibung: material,
+      eNummer: "",
+      charge: "",
+      palette: "",
+      bestand: "",
+      gesamt: entry.total > 0 ? entry.total + " kg" : ""
+    });
+  });
+
+  return result;
+}
+
+  /* =========================
+     Print-Funktion / INVENTUR
+  ========================= */
+function printInventur() {
+  window.print();
+}
+
+
+function highlightText(text, term) {
+  if (!term) return text;
+
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(${escaped})`, "gi");
+
+  return String(text).replace(regex, '<mark class="search-hit">$1</mark>');
+}
+
 
 /* =====================================================
    SPALTEN TOGGLE – KE
@@ -502,6 +807,7 @@ function resetMaterialData() {
         renderFM();
         renderFS();
         render();
+        renderInventur();
       // HARD RELOAD ohne App-Reinit
       location.href = location.pathname;
 }
@@ -575,6 +881,8 @@ safeOn(search, "input", () => {
   if (current) {
     TabController.show(current);
   }
+    // ✅ NACH dem Rendern zum ersten Treffer springen
+  requestAnimationFrame(scrollToFirstHighlight);
 });
 
 /* =====================================================

@@ -624,14 +624,7 @@ document
     });
   });
 
-  function highlightText(text, term) {
-  if (!term) return text;
 
-  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const regex = new RegExp(`(${escaped})`, "gi");
-
-  return String(text).replace(regex, '<mark class="search-hit">$1</mark>');
-}
 
 function resetFM() {
   if (!confirm("FM-Daten wirklich zurücksetzen?")) return;
