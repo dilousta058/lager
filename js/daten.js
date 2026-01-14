@@ -104,6 +104,18 @@ function clearAllTables() {
 }
 
 /* =====================================================
+   RESET KE SECTION
+===================================================== */
+function resetKE() {
+  if (!confirm("KE-Daten wirklich zurücksetzen?")) return;
+
+  localStorage.removeItem("materialData");
+  data   = structuredClone(defaultData);
+
+  renderKE();
+}
+
+/* =====================================================
    LOGIN / LOGOUT
 ===================================================== */
 function login(e) {
@@ -629,7 +641,7 @@ function renderHistoryKE() {
    HISTORY IMPORT / EXPORT
 ===================================================== */
 function renderHistory() {
-  const body = document.getElementById("historyBody");
+  const body = document.getElementById("historyBodyIExport");
   if (!body) return;
 
   body.innerHTML = "";
@@ -663,6 +675,8 @@ function syncUI() {
   status.textContent = editEnabled
     ? "🔓 Bearbeitung aktiv"
     : "🔒 Gesperrt!";
+
+
 }
 
 function syncAdminUI() {
@@ -1019,7 +1033,7 @@ function editCell(icon, index, field) {
   td.innerHTML = `
     <div class="edit-wrapper">
       <input class="edit-input" value="${oldValue}">
-      <button class="edit-apply" type="button">Übernehmen</button>
+      <button class="edit-apply" type="button">✅</button>
     </div>
   `;
 

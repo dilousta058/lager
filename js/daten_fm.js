@@ -7,7 +7,6 @@ const FM_STORAGE_KEY = "fmData";
    Editier Bereich – FS
 ========================= */
 const FM_EDITABLE_FIELDS = [
-  "lieferung_pr",
   "bestand",
   "bemerkung"
 ];
@@ -25,7 +24,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60",
     abmessung: "6 x 610",
     verpackung: "250",
-    lieferung_pr: "",
+    pos_Nr: "1",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -38,7 +37,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80",
     abmessung: "6 x 610",
     verpackung: "250",
-    lieferung_pr: "",
+    pos_Nr: "2",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -51,7 +50,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60",
     abmessung: "15 x 457",
     verpackung: "250",
-    lieferung_pr: "",
+    pos_Nr: "3",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -64,7 +63,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80",
     abmessung: "15 x 457",
     verpackung: "250",
-    lieferung_pr: "",
+    pos_Nr: "4",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -77,7 +76,7 @@ const DEFAULT_FM_DATA = [
     koernung: "50",
     abmessung: "25 x 760",
     verpackung: "50",
-    lieferung_pr: "",
+    pos_Nr: "5",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -90,7 +89,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60",
     abmessung: "25 x 760",
     verpackung: "100",
-    lieferung_pr: "",
+    pos_Nr: "6",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -103,7 +102,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80",
     abmessung: "25 x 760",
     verpackung: "100",
-    lieferung_pr: "",
+    pos_Nr: "7",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -116,7 +115,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60",
     abmessung: "50 x 1067",
     verpackung: "10",
-    lieferung_pr: "",
+    pos_Nr: "8",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -129,7 +128,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60",
     abmessung: "50 x 1067",
     verpackung: "20",
-    lieferung_pr: "",
+    pos_Nr: "9",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -142,7 +141,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80",
     abmessung: "50 x 1067",
     verpackung: "20",
-    lieferung_pr: "",
+    pos_Nr: "10",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -156,7 +155,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80",
     abmessung: "50 x 2500",
     verpackung: "100",
-    lieferung_pr: "",
+    pos_Nr: "11",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -169,7 +168,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60",
     abmessung: "50 x 2500",
     verpackung: "50",
-    lieferung_pr: "",
+    pos_Nr: "12",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -182,7 +181,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80",
     abmessung: "50 x 2500",
     verpackung: "50",
-    lieferung_pr: "",
+    pos_Nr: "13",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -195,7 +194,7 @@ const DEFAULT_FM_DATA = [
     koernung: "120",
     abmessung: "48 x 2500",
     verpackung: "20",
-    lieferung_pr: "",
+    pos_Nr: "14",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -209,7 +208,7 @@ const DEFAULT_FM_DATA = [
     koernung: "180",
     abmessung: "48 x 2500",
     verpackung: "20",
-    lieferung_pr: "",
+    pos_Nr: "15",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -222,7 +221,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60",
     abmessung: "50 x 3500",
     verpackung: "50",
-    lieferung_pr: "",
+    pos_Nr: "16",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -236,7 +235,7 @@ const DEFAULT_FM_DATA = [
     koernung: "61800",
     abmessung: "15 x 9457",
     verpackung: "250",
-    lieferung_pr: "",
+    pos_Nr: "17",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -249,7 +248,7 @@ const DEFAULT_FM_DATA = [
     koernung: "180",
     abmessung: "25 x 760",
     verpackung: "100",
-    lieferung_pr: "",
+    pos_Nr: "18",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -263,7 +262,7 @@ const DEFAULT_FM_DATA = [
     koernung: "180",
     abmessung: "50 x 2500",
     verpackung: "20",
-    lieferung_pr: "",
+    pos_Nr: "19",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -276,7 +275,7 @@ const DEFAULT_FM_DATA = [
     koernung: "120",
     abmessung: "50 x 2500",
     verpackung: "20",
-    lieferung_pr: "",
+    pos_Nr: "20",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -290,7 +289,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60",
     abmessung: "25 x 3500",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "21",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -303,7 +302,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80",
     abmessung: "25 x 3500",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "22",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -317,7 +316,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80",
     abmessung: "50 x 2500",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "23",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -330,7 +329,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60",
     abmessung: "50 x 1067",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "24",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -344,7 +343,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60",
     abmessung: "150 x 3500",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "25",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -357,7 +356,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60+",
     abmessung: "18 x 2030",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "26",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -371,7 +370,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80+",
     abmessung: "18 x 2040",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "27",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -384,7 +383,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80",
     abmessung: "18 x 2010",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "28",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -398,7 +397,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60+",
     abmessung: "30 x 3500",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "29",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -411,7 +410,7 @@ const DEFAULT_FM_DATA = [
     koernung: "36+",
     abmessung: "30 x 3500",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "30",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -425,7 +424,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80",
     abmessung: "25 x 3500",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "31",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -438,7 +437,7 @@ const DEFAULT_FM_DATA = [
     koernung: "60",
     abmessung: "25 x 3500",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "32",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -452,7 +451,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80",
     abmessung: "50 x 3500",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "33",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -465,7 +464,7 @@ const DEFAULT_FM_DATA = [
     koernung: "80",
     abmessung: "6 x 610",
     verpackung: "????",
-    lieferung_pr: "",
+    pos_Nr: "34",
     bestand: 0,
     bemerkung: "",
     _isDefault: true
@@ -507,21 +506,36 @@ function setTabCount(tab, count) {
 /* Edit funktion */
 function fmCell(value, rowIndex, field) {
   const canEdit = FM_EDITABLE_FIELDS.includes(field);
+  let extraClass = "";
+
+  /* ===== BESTAND-FÄRBUNG ===== */
+  if (field === "bestand") {
+    const pos = rowIndex + 1;                 // Position 1–34
+    const bestand = Number(value) || 0;
+
+    if (pos >= 1 && pos <= 34) {
+      extraClass = bestand === 0
+        ? "fm-bestand-zero"
+        : "fm-bestand-ok";
+    }
+  }
+  /* ===== ENDE BESTAND-FÄRBUNG ===== */
 
   return `
-    <td data-col="${field}" class="${canEdit ? "" : "protected"}">
+    <td data-col="${field}" class="${extraClass} ${canEdit ? "" : "protected"}">
       <div class="edit-wrapper">
         <span>${value ?? ""}</span>
         ${
           canEdit
             ? `<span class="edit-icon"
-                   onclick="editFM(this, ${rowIndex}, '${field}')">✏️</span>`
+                     onclick="editFM(this, ${rowIndex}, '${field}')">✏️</span>`
             : ""
         }
       </div>
     </td>
   `;
 }
+
 
 function editFM(icon, rowIndex, field) {
   /* 
@@ -601,7 +615,7 @@ function renderFM() {
         <td data-col="koernung">${highlightText(row.koernung ?? "", globalSearchTerm)}</td>
         <td data-col="abmessung">${highlightText(row.abmessung ?? "", globalSearchTerm)}</td>
         <td data-col="verpackung">${highlightText(row.verpackung ?? "", globalSearchTerm)}</td>
-        ${fmCell(row.lieferung_pr, i, "lieferung_pr")}
+        <td data-col="verpackung">${highlightText(row.pos_Nr ?? "", globalSearchTerm)}</td>
         ${fmCell(row.bestand, i, "bestand")}
         ${fmCell(row.bemerkung, i, "bemerkung")}
       </tr>

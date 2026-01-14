@@ -99,6 +99,11 @@
                 <label><input type="checkbox" data-col="regal" checked> Regal</label>
                 <label><input type="checkbox" data-col="bestand" checked> Bestand</label>
                 <label><input type="checkbox" data-col="bemerkung" checked> Bemerkung</label>
+
+                  <div style="display: flex; justify-content: flex-end;">
+                      <button id="ResetKEToggleBtn" class="ResetKEBtn" onclick="resetKE()">Tabelle zurücksetzen</button>
+                  </div>
+
               </div>
         <center>
           <!-- Such- & Steuerleiste -->
@@ -194,20 +199,24 @@
                 FM SECTION
             ========================= -->
               <section id="fmSection" class="tab-section">
-                                              <button id="ResetFMToggleBtn" onclick="resetFM()">Tabelle zurücksetzen</button>
+                                              
               <!-- Spaltenauswahl -->
               <div class="fm-column-toggle">
                 <label><label class="locked"><input type="checkbox" checked disabled> Abmessung</label>
-                <label><input type="checkbox" data-col="pos1" checked> Pos. Nr.</label>
-                <label><input type="checkbox" data-col="artikel1" checked> Artikel-Nr. #1</label>
-                <label><input type="checkbox" data-col="artikel2" checked> Artikel-Nr. #2</label>
-                <label><input type="checkbox" data-col="artikel" checked> Artikel</label>
-                <label><input type="checkbox" data-col="koernung" checked> Körnung</label>
-                <label><input type="checkbox" data-col="verpackung" checked> Verpackung</label>
-                <label><input type="checkbox" data-col="lieferung_pr" checked> Lieferung – PR</label>
+                <label><input type="checkbox" data-col="pos1" checked>Pos. Nr.</label>
+                <label><input type="checkbox" data-col="artikel1" checked>Artikel-Nr. #1</label>
+                <label><input type="checkbox" data-col="artikel2" checked>Artikel-Nr. #2</label>
+                <label><input type="checkbox" data-col="artikel" checked>Artikel</label>
+                <label><input type="checkbox" data-col="koernung" checked>Körnung</label>
+                <label><input type="checkbox" data-col="verpackung" checked>Verpackung</label>
+                <label><input type="checkbox" data-col="pos_Nr" checked>Pos.Nr.</label>
                 <label><input type="checkbox" data-col="bestand" checked> Bestand</label>
                 <label><input type="checkbox" data-col="bemerkung" checked> Bemerkung</label>
+                  <div style="display: flex; justify-content: flex-end;">
+                      <button id="ResetFMToggleBtn" class="ResetFMBtn" onclick="resetFM()">Tabelle zurücksetzen</button>
+                  </div>
               </div>
+
 
               <!-- Tabelle -->
               <div class="table-fullwidth">
@@ -222,7 +231,7 @@
                         <th data-col="koernung">Körnung</th>
                         <th data-col="abmessung">Abmessung</th>
                         <th data-col="verpackung">Verpackung</th>
-                        <th data-col="lieferung_pr">Lieferung – PR</th>
+                        <th data-col="lieferung_pr">Pos.Nr.</th>
                         <th data-col="bestand">Bestand</th>
                          <th data-col="bemerkung">Bemerkung</th>
                       </tr>
@@ -276,7 +285,7 @@
                     <th>Zeitpunkt</th>
                   </tr>
                 </thead>
-                <tbody id="historyBody"></tbody>
+                <tbody id="historyBodyIExport"></tbody>
               </table>
             </div>
           </section>
