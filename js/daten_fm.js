@@ -232,8 +232,8 @@ const DEFAULT_FM_DATA = [
     artikel1: "E00034309",
     artikel2: "E000XXXXX",
     artikel: "052J",
-    koernung: "61800",
-    abmessung: "15 x 9457",
+    koernung: "180",
+    abmessung: "15 x 457",
     verpackung: "250",
     pos_Nr: "17",
     bestand: 0,
@@ -507,11 +507,13 @@ function setTabCount(tab, count) {
 function fmCell(value, rowIndex, field) {
   const canEdit = FM_EDITABLE_FIELDS.includes(field);
   let extraClass = "";
-
-  /* ===== BESTAND-FÄRBUNG ===== */
+  let tooltip = "";
+/* ===== TOOLTIP FÜR GANZE SPALTE ===== */
   if (field === "bestand") {
-    const pos = rowIndex + 1;                 // Position 1–34
+    const pos = rowIndex + 1;
     const bestand = Number(value) || 0;
+
+    tooltip = `Bestand: ${bestand}`;
 
     if (pos >= 1 && pos <= 34) {
       extraClass = bestand === 0
@@ -519,10 +521,13 @@ function fmCell(value, rowIndex, field) {
         : "fm-bestand-ok";
     }
   }
-  /* ===== ENDE BESTAND-FÄRBUNG ===== */
-
+/* ===== ENDE ===== */
   return `
-    <td data-col="${field}" class="${extraClass} ${canEdit ? "" : "protected"}">
+    <td
+      data-col="${field}"
+      class="${extraClass} ${canEdit ? "" : "protected"}"
+      title="${tooltip}"
+    >
       <div class="edit-wrapper">
         <span>${value ?? ""}</span>
         ${
@@ -535,6 +540,8 @@ function fmCell(value, rowIndex, field) {
     </td>
   `;
 }
+
+
 
 
 function editFM(icon, rowIndex, field) {
@@ -605,9 +612,12 @@ function renderFM() {
   setTabCount("fm", fmFiltered.length);
   /* ===== ENDE FILTER ===== */
 
-  fmFiltered.forEach((row, i) => {
-    tbody.innerHTML += `
-      <tr>
+fmFiltered.forEach((row, i) => {
+  const bestand = Number(row.bestand) || 0;
+  const bestandText = bestand.toLocaleString("de-DE");
+
+  tbody.innerHTML += `
+    <tr title="Lagerbestand: ${bestandText}">
         <td data-col="pos1">${highlightText(row.pos1 ?? "", globalSearchTerm)}</td>
         <td data-col="artikel1">${highlightText(row.artikel1 ?? "", globalSearchTerm)}</td>
         <td data-col="artikel2">${highlightText(row.artikel2 ?? "", globalSearchTerm)}</td>

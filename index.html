@@ -27,6 +27,10 @@
 
 </head>
 <body>
+<div id="print-header">
+  <div class="print-title">Lagerbestand</div>
+  <div class="print-date" id="print-date"></div>
+</div>
 
 <!-- =========================
      LOGIN-BEREICH
@@ -66,7 +70,7 @@
         <input class="inputs" id="keyInput" type="password" placeholder="Key eingeben">
         <button id="unlockBtn" class="btn" onclick="unlockEditing()">🔓 Freischalten</button>
         <button class="btn" onclick="lockEditing()">🔒 Sperren</button>
-        <span id="status"></span>
+        <span id="status" class="info"></span>
 
         <header class="header">
           <button id="themeToggleBtn" class="btn-primary" onclick="toggleTheme()">🌙 Dark Mode</button>
@@ -81,7 +85,9 @@
           <button class="tab-btn" data-tab="fm">FM-Schleifbänder</button>
           <button class="tab-btn" data-tab="inv">Inventur Liste</button>
           <button class="tab-btn" data-tab="historySectionIExport">Historie</button>
+          <button class="no-print" onclick="printTable()">Drucken</button>
         </div>
+
         <hr>
         
         <input class="sSearch" id="search" placeholder="Suche (Material, E-Nummer, Regal)">
@@ -92,13 +98,13 @@
 
             <div id="keSection" class="tab-section active">
               <div class="ke-column-controls">
-                <label class="locked"><input type="checkbox" checked disabled> Material</label>
-                <label><input type="checkbox" data-col="e" checked> E-Nummer</label>
-                <label><input type="checkbox" data-col="charge" checked> Charge-Nr.</label>
-                <label><input type="checkbox" data-col="palette" checked> Paletten-Nr.</label>
-                <label><input type="checkbox" data-col="regal" checked> Regal</label>
-                <label><input type="checkbox" data-col="bestand" checked> Bestand</label>
-                <label><input type="checkbox" data-col="bemerkung" checked> Bemerkung</label>
+                <label class="locked"><input type="checkbox" checked disabled>Material</label>
+                <label><input type="checkbox" data-col="e" checked>E-Nummer</label>
+                <label><input type="checkbox" data-col="charge" checked>Charge-Nr.</label>
+                <label><input type="checkbox" data-col="palette" checked>Paletten-Nr.</label>
+                <label><input type="checkbox" data-col="regal" checked>Regal</label>
+                <label><input type="checkbox" data-col="bestand" checked>Bestand</label>
+                <label><input type="checkbox" data-col="bemerkung" checked>Bemerkung</label>
 
                   <div style="display: flex; justify-content: flex-end;">
                       <button id="ResetKEToggleBtn" class="ResetKEBtn" onclick="resetKE()">Tabelle zurücksetzen</button>
@@ -252,7 +258,7 @@
                   Inventur-Stichtag:
                   <input type="date" id="inventurDate">
                 </label>
-                <button onclick="saveInventurDate()">Fixieren</button><button onclick="printInventur()">Drucken (A4)</button>
+                <button onclick="saveInventurDate()">Fixieren</button>
               </div>
 
               <div class="table-fullwidth">

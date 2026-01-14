@@ -487,7 +487,7 @@ function renderInventur() {
   ========================= */
   const fmRows = fmData.map(r => ({
     source: "FM",
-    beschreibung: `${r.artikel} ${r.abmessung}`,
+    beschreibung: `Pos ${r.pos_Nr}. /  ${r.artikel} / ${r.abmessung} / #${r.koernung}`,
     eNummer: r.artikel1 || "",
     charge: "",
     palette: "",
@@ -508,7 +508,7 @@ function renderInventur() {
   rows.forEach(r => {
     body.innerHTML += `
       <tr class="${r.gesamt ? 'inventory-sum' : ''}">
-        <td>${r.source}</td>
+        <td>${highlightText(r.source, globalSearchTerm)}</td>
         <td>${highlightText(r.beschreibung, globalSearchTerm)}</td>
         <td>${highlightText(r.eNummer, globalSearchTerm)}</td>
         <td>${highlightText(r.charge, globalSearchTerm)}</td>
@@ -584,11 +584,24 @@ function buildKEInventurRows() {
 }
 
   /* =========================
-     Print-Funktion / INVENTUR
+     Print-Funktion
   ========================= */
-function printInventur() {
+
+function updatePrintDate() {
+  const el = document.getElementById("print-date");
+  if (!el) return;
+
+  const now = new Date();
+  el.textContent = `Stand: ${now.toLocaleDateString("de-DE")} ${now.toLocaleTimeString("de-DE")}`;
+  document.querySelector(".print-title").textContent =
+  document.querySelector(".tab-btn.active")?.innerText || "Lagerübersicht";
+}
+
+function printTable() {
+  updatePrintDate();
   window.print();
 }
+
 
 
 function highlightText(text, term) {

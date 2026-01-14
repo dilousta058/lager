@@ -717,16 +717,17 @@ mark.search-hit {
     font-size: 11px;
   }
 
-    /* Alles aus */
+    /* Alles aus ---> Das ist nur sinnvoll, wenn ausschließlich nur Inventur drucken.
   body * {
     visibility: hidden;
   }
 
-  /* Inventur sichtbar */
+/* Inventur sichtbar 
 #inventarSection,
 #inventarSection * {
   visibility: visible;
 }
+*/
 
 #inventarSection {
     position: absolute;
@@ -806,7 +807,6 @@ mark.search-hit {
   background: #f3f4f6;
 }
 
-
 /* ==============================
    Tabellenkopf beim Scrollen fix
 ============================== */
@@ -868,5 +868,179 @@ mark.search-hit {
     justify-content: flex-start;
   }
 }
+/* ======================
+   DRUCKLAYOUT (A4)
+====================== */
+#print-header {
+  display: none;
+}
 
+  @media print {
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+}
+
+@media print {
+
+  /* =====================
+     GRUNDLAYOUT
+  ===================== */
+  @page {
+    size: A4;
+    margin: 15mm;
+
+  }
+
+  body {
+    margin-top: 35mm;
+    padding: 0;
+    font-size: 11pt;
+    color: #000;
+  }
+
+  /* =====================
+     SCROLL / TABS
+  ===================== */
+  .table-scroll {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .tab-section {
+    display: none !important;
+  }
+
+  .tab-section.active {
+    display: block !important;
+  }
+
+/* ======================
+   DRUCK-HEADER
+====================== */
+#print-header {
+  display: none;
+}
+
+@media print {
+
+  #print-header {
+    display: block;
+    position: static;           
+    margin-bottom: 8mm;
+    padding-bottom: 4mm;
+    border-bottom: 1px solid #000;
+  }
+/* WICHTIG 
+  .print-title {
+    font-size: 14pt;
+    font-weight: bold;
+  }
+*/
+  .print-date {
+    font-size: 10pt;
+    margin-top: 2mm;
+  }
+
+}
+  /* =====================
+     TABELLE
+  ===================== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  th,
+  td {
+    border: 1px solid #000;
+    padding: 4px 6px;
+    vertical-align: middle;
+  }
+
+  th {
+    background: #eaeaea;
+    font-weight: bold;
+  }
+
+    /* =====================
+     UI & FORM AUSBLENDEN
+  ===================== */
+  button,
+  .btn,
+  .no-print,
+  .edit-icon,
+  .sSearch,
+  .tabs,
+  .inputs,
+  .status,
+  .info,
+  .filter,
+  form,
+  label,
+  input,
+  select,
+  textarea,
+  h1, h2,
+  hr,
+  .hr,
+  .divider,
+  [role="separator"] {
+    display: none !important;
+  }
+  /* =====================
+     FARBE (wenn erlaubt)
+  ===================== */
+  .fm-bestand-zero {
+    background-color: #78350f !important;
+    color: #fff !important;
+    border-left: 6px solid #78350f !important;
+  }
+
+  .fm-bestand-ok {
+    background-color: #0d7a05 !important;
+    color: #fff !important;
+    border-left: 6px solid #0d7a05 !important;
+  }
+
+  /* =====================
+     TEXTLICHE KENNZEICHNUNG
+  ===================== */
+  .fm-bestand-zero::after {
+    content: " (leer)";
+    font-weight: bold;
+    color: #000 !important;
+    background: #fff;
+    padding-left: 4px;
+  }
+
+  .fm-bestand-ok::after {
+    content: " (" attr(data-unit) ")";
+    font-weight: bold;
+    color: #000 !important;
+    background: #fff;
+    padding-left: 4px;
+  }
+
+
+
+  /* =====================
+     FOOTER / SEITENZAHL
+  ===================== */
+  footer::after {
+    content: "Seite " counter(page);
+  }
+
+}
 
