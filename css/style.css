@@ -1033,7 +1033,11 @@ mark.search-hit {
     padding-left: 4px;
   }
 
-
+@media (max-width: 1024px) {
+  .checkbox-group {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 
   /* =====================
      FOOTER / SEITENZAHL
